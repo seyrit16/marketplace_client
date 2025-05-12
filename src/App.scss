@@ -1,0 +1,15 @@
+@import "styles/variables";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+
+.app {
+  text-align: center;
+  padding: 20px;
+}
+.h1-test{
+  font-family: 'Inter', sans-serif;
+  color: $background-text-color;
+}
+.h2-test{
+  font-family: Arial, sans-serif;
+  color: $background-text-color;
+}
