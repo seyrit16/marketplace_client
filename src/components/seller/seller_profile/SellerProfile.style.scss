@@ -1,0 +1,594 @@
+@import "/src/styles/variables";
+
+$border-radius-lg: 0.75rem;
+$border-radius-md: 0.5rem;
+$border-radius-sm: 0.75rem;
+$transition-standard: all 0.3s ease;
+$shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+$shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.1);
+$red-color: #D9534F;
+$main-padding: 2rem;
+
+$button-font-size: 1.2rem;
+
+$success-color: $background-color;
+
+.seller-profile {
+  background-color: $background-color;
+  color: $background-text-color;
+  padding: $main-padding;
+  margin-top: 6rem;
+  min-height: 100vh;
+
+  .email-section,
+  .password-section {
+    max-width: 500px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      margin-top: 1rem;
+
+      .secondary-button,
+      .submit-button {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        border-radius: $border-radius-md;
+        border: none;
+        cursor: pointer;
+        transition: $transition-standard;
+        font-weight: 500;
+      }
+
+      .secondary-button {
+        background-color: transparent;
+        color: $background-text-color;
+
+        &:hover {
+          color: lighten($background-text-color, 20%);
+          text-decoration: underline;
+        }
+      }
+
+      .submit-button {
+        background-color: $primary-color;
+        color: $primary-text-color;
+
+        &:hover {
+          background-color: darken($primary-color, 10%);
+        }
+      }
+    }
+  }
+  .email-form,
+  .password-form {
+    width: 100%;
+    .form-group {
+      margin-bottom: 1.5rem;
+      justify-content: start;
+      align-items: start;
+      text-align: start;
+
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: $background-text-color;
+      }
+
+      .submit-button {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        border-radius: $border-radius-md;
+        border: none;
+        cursor: pointer;
+        transition: $transition-standard;
+        font-weight: 500;
+      }
+
+      .secondary-button {
+        background-color: transparent;
+        color: $background-text-color;
+
+        &:hover {
+          color: lighten($background-text-color, 20%);
+          text-decoration: underline;
+        }
+      }
+
+      .submit-button {
+        background-color: $primary-color;
+        color: $primary-text-color;
+
+        &:hover {
+          background-color: darken($primary-color, 10%);
+        }
+      }
+
+      input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid rgba($background-text-color, 0.2);
+        border-radius: $border-radius-md;
+        background-color: $background-color;
+        color: $background-text-color;
+        font-size: 1rem;
+        transition: $transition-standard;
+
+        &:focus {
+          outline: none;
+          border-color: $secondary-text-color;
+          box-shadow: 0 0 5px rgba($secondary-color, 0.8);
+        }
+
+        &.error {
+          border-color: $error-color;
+        }
+
+        &:disabled {
+          background-color: darken($background-color, 5%);
+          color: darken($background-text-color, 30%);
+          cursor: not-allowed;
+        }
+      }
+
+      .error-text {
+        display: block;
+        color: $error-color;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+      }
+    }
+
+    .password-input {
+      position: relative;
+
+      input {
+        padding-right: 3rem;
+      }
+
+      .password-toggle {
+        position: absolute;
+        right: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: darken($background-text-color, 20%);
+        cursor: pointer;
+        transition: $transition-standard;
+
+        &:hover {
+          color: $background-text-color;
+        }
+      }
+    }
+  }
+
+  // Verification Form
+  .verification-form {
+    text-align: center;
+
+    p {
+      margin-bottom: 1.5rem;
+      color: darken($background-text-color, 20%);
+    }
+
+    .code-inputs {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+
+      .code-input {
+        width: 50px;
+        height: 60px;
+        text-align: center;
+        font-size: 1.5rem;
+        font-weight: 600;
+        border: 2px solid rgba($background-text-color, 0.2);
+        border-radius: $border-radius-md;
+        background-color: $background-color;
+        color: $background-text-color;
+        transition: $transition-standard;
+
+        &:focus {
+          outline: none;
+          border-color: $secondary-text-color;
+          box-shadow: 0 0 5px rgba($secondary-color, 0.8);
+        }
+      }
+    }
+
+    .error-text {
+      color: $error-color;
+      font-size: 0.875rem;
+      margin-bottom: 1rem;
+    }
+    .secondary-button,
+    .submit-button {
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      border-radius: $border-radius-md;
+      border: none;
+      cursor: pointer;
+      transition: $transition-standard;
+      font-weight: 500;
+    }
+
+    .secondary-button {
+      background-color: transparent;
+      color: $background-text-color;
+
+      &:hover {
+        color: lighten($background-text-color, 20%);
+        text-decoration: underline;
+      }
+    }
+
+    .submit-button {
+      background-color: $primary-color;
+      color: $primary-text-color;
+
+      &:hover {
+        background-color: darken($primary-color, 10%);
+      }
+    }
+  }
+
+  .success-message {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background-color: transparent;
+    color: lighten($background-text-color, 20%);
+    border-radius: $border-radius-md;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .profile-wrapper {
+    display: flex;
+    background-color: $background-color;
+    border-radius: $border-radius-lg;
+    box-shadow: $shadow-lg;
+    overflow: hidden;
+
+    .sidebar {
+      width: 30%;
+      background-color: $background-color;
+      border-right: 1px solid rgba($background-text-color, 0.1);
+      padding: 1.5rem 1rem;
+
+      .seller-header {
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid rgba($background-text-color, 0.1);
+        margin-bottom: 1rem;
+
+
+        .company-info {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+
+          .avatar {
+            width: 48px;
+            height: 48px;
+            background-color: $primary-color;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            svg {
+              color: $primary-text-color;
+            }
+          }
+
+          .text-info {
+            h2 {
+              font-size: 1.1rem;
+              font-weight: 600;
+              margin-bottom: 0.25rem;
+            }
+
+            p {
+              font-size: 0.85rem;
+              color: darken($background-text-color, 25%);
+            }
+
+            .status {
+              display: flex;
+              align-items: center;
+              margin-top: 0.25rem;
+              font-size: 0.75rem;
+              color: darken($background-text-color, 35%);
+
+              .status-dot {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                margin-right: 0.5rem;
+
+                &.active {
+                  background-color: $success-color;
+                }
+
+                &.inactive {
+                  background-color: $error-color;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      .nav {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+
+        .nav-item {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          padding: 0.75rem 1rem;
+          background-color: transparent;
+          color: $background-text-color;
+          border-radius: $border-radius-md;
+          font-size: 0.95rem;
+          cursor: pointer;
+          transition: $transition-standard;
+          text-align: left;
+          border: none;
+
+          &:hover {
+            box-shadow: 0 0 5px rgba($secondary-color, 0.8);
+          }
+
+
+          &.active {
+            background-color: $primary-color;
+            color: $primary-text-color;
+            border-color: $primary-color;
+            box-shadow: 0 0 8px rgba($primary-color, 0.6);
+          }
+
+          &.delete {
+
+            background-color: $red-color;
+            color: $background-color;
+            border-color: $red-color;
+            box-shadow: 0 0 8px rgba($red-color, 0.6);
+          }
+
+          svg {
+            flex-shrink: 0;
+          }
+        }
+      }
+    }
+
+    .profile-content {
+      width: 75%;
+      padding: 2rem;
+      background-color: $background-color;
+    }
+  }
+
+  .seller-overview {
+    display:  flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin: 0 auto;
+    max-width: 800px;
+
+    background-color: transparent;
+    color: $background-text-color;
+    padding: 2rem;
+    border-radius: $border-radius-lg;
+
+    h3 {
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: 2rem;
+      color: $background-text-color;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+
+      @media (min-width: 768px) {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .info-block {
+        background-color: $background-color;
+        padding: 1.5rem;
+        border-radius: $border-radius-md;
+        box-shadow: $shadow-sm;
+        text-align: start;
+
+        h4 {
+          justify-self: center;
+          font-size: 1.3rem;
+          font-weight: 600;
+          margin-bottom: 1rem;
+          color: lighten($background-text-color, 10%);
+        }
+
+        p {
+          font-size: 1rem;
+          line-height: 1.6;
+          margin-bottom: 0.5rem;
+
+          strong {
+            color: $background-text-color;
+          }
+
+          &.description {
+            font-size: 0.95rem;
+            color: darken($background-text-color, 20%);
+          }
+        }
+      }
+
+      .full-width {
+        grid-column: span 1;
+
+        @media (min-width: 768px) {
+          grid-column: span 2;
+        }
+      }
+    }
+  }
+
+  .company-section,
+  .personal-section,
+  .payment-section,
+  .delete-section{
+    background-color: $background-color;
+    color: $background-text-color;
+    padding: 2rem;
+    border-radius: $border-radius-lg;
+    max-width: 100%;
+
+    h3 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      color: $background-text-color;
+    }
+
+    .form-wrapper {
+      max-width: 800px;
+
+      .form-group {
+        margin-bottom: 1.5rem;
+        text-align: start;
+
+        label {
+          display: block;
+          margin-bottom: 0.5rem;
+          font-size: 0.95rem;
+          font-weight: 500;
+          color: $background-text-color;
+        }
+
+        input,
+        textarea {
+          width: 100%;
+          padding: 0.75rem;
+          border: 1px solid rgba($background-text-color, 0.2);
+          border-radius: $border-radius-md;
+          background-color: $background-color;
+          color: $background-text-color;
+          font-size: 1rem;
+          transition: $transition-standard;
+          resize: vertical;
+
+          &:focus {
+            outline: none;
+            border-color: $secondary-text-color;
+            box-shadow: 0 0 5px rgba($secondary-color, 0.8);
+          }
+
+          &.error {
+            border-color: $error-color;
+          }
+        }
+
+        textarea{
+          min-height: 100px;
+        }
+
+        .error-text {
+          color: $error-color;
+          font-size: 0.875rem;
+          margin-top: 0.25rem;
+        }
+      }
+
+      .disclaimer{
+        color:$red-color;
+      }
+
+      .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+
+        .submit-button {
+          padding: 0.75rem 1.5rem;
+          background-color: $primary-color;
+          color: $primary-text-color;
+          border: none;
+          border-radius: $border-radius-md;
+          cursor: pointer;
+          font-size: 1rem;
+          font-weight: 500;
+          transition: $transition-standard;
+
+          &:hover {
+            background-color: darken($primary-color, 10%);
+          }
+
+          &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+          }
+        }
+
+        .delete-button {
+          padding: 0.75rem 1.5rem;
+          background-color: $red-color;
+          color: $background-color;
+          border: none;
+          border-radius: $border-radius-md;
+          cursor: pointer;
+          font-size: 1rem;
+          font-weight: 500;
+          transition: $transition-standard;
+
+          &:hover {
+            background-color: darken($red-color, 10%);
+          }
+
+          &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+          }
+        }
+
+
+        .cancel-button {
+          padding: 0.75rem 1.5rem;
+          background-color: transparent;
+          color: $background-text-color;
+          border: none;
+          border-radius: $border-radius-md;
+          cursor: pointer;
+          font-size: 1rem;
+          font-weight: 500;
+          transition: $transition-standard;
+
+          &:hover {
+            color: lighten($background-text-color, 20%);
+            text-decoration: underline;
+          }
+        }
+      }
+    }
+  }
+}
+
+

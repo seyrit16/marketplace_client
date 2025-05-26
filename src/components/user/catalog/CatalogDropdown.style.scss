@@ -1,0 +1,188 @@
+@import "../../../styles/variables";
+
+.catalog-dropdown-overlay {
+  position: fixed;
+  top: 7.3rem;
+  width: calc(100vw - 80px);
+  height: 100%;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  transform: translateY(-14px)
+}
+
+.catalog-dropdown {
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: $background-color;
+  border-radius: 0 0 20px 20px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  overflow: hidden;
+  animation: slideDown 0.3s ease-in-out;
+
+
+  .catalog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: $secondary-color;
+    color: $secondary-text-color;
+
+    h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+
+      svg {
+        width: 1.5rem;
+        height: 1.5rem;
+        stroke: $secondary-text-color;
+      }
+    }
+  }
+
+  .catalog-content {
+    display: flex;
+    height: 400px;
+    user-select: none;
+
+    .categories-list {
+      width: 30%;
+      border-right: 1px solid $secondary-color;
+      overflow-y: auto;
+
+      .category-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        color: $background-text-color;
+
+        &:hover, &.active {
+          box-shadow: 0 0 5px rgba($secondary-color, 0.8);
+          color: lighten($background-text-color, 20%);
+        }
+
+        svg {
+          width: 1rem;
+          height: 1rem;
+          stroke: $background-text-color;
+        }
+      }
+    }
+
+    .subcategories-container {
+      flex: 1;
+      padding: 1.5rem;
+      overflow-y: auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+
+      .subcategory-group {
+        width: calc(33.33% - 2rem);
+        min-width: 200px;
+        max-width: 14vw;
+
+        .subcategory-title {
+          margin: 0 0 1rem 0;
+          font-size: 1.1rem;
+          font-weight: 600;
+          color: $background-text-color;
+          padding-bottom: 0.5rem;
+          border-bottom: 2px solid $secondary-color;
+        }
+
+        .subcategory-items {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+
+          li {
+            margin-bottom: 0.5rem;
+
+            a {
+              color: $background-text-color;
+              text-decoration: none;
+              transition: color 0.2s;
+
+              &:hover {
+                color: lighten($background-text-color, 20%);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+/* Адаптивность для экранов до 768px (таблеты) */
+@media (max-width: 768px) {
+  .catalog-dropdown-overlay{
+    top: 17rem;
+  }
+
+  .catalog-dropdown {
+    .catalog-content {
+      flex-direction: column;
+      height: auto;
+      max-height: 80vh;
+
+      .categories-list {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid $secondary-color;
+        max-height: 200px;
+      }
+
+      .subcategories-container {
+        max-height: calc(80vh - 200px);
+
+        .subcategory-group {
+          width: calc(50% - 1rem);
+        }
+      }
+    }
+  }
+}
+
+/* Адаптивность для экранов до 480px (мобильные) */
+@media (max-width: 480px) {
+  .catalog-dropdown-overlay{
+    top: 15.5rem;
+  }
+
+  .catalog-dropdown {
+    .catalog-header {
+      padding: 0.8rem 1rem;
+
+      h2 {
+        font-size: 1.2rem;
+      }
+    }
+
+    .catalog-content {
+      .subcategories-container {
+        padding: 1rem;
+
+        .subcategory-group {
+          width: 100%;
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,331 @@
+@use 'sass:map';
+@import "/src/styles/variables";
+
+$logo-font-size: 4.8rem;
+$header-font-size: 1.5rem;
+
+.header {
+  top: 0;
+  position: fixed;
+  width: calc(100vw - 80px);
+  background-color: $secondary-color;
+  color: $secondary-text-color;
+
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+
+  z-index: 100;
+
+  .container {
+    display: grid;
+    grid-template-columns: 1.5fr 1.2fr 3fr 1fr 0.5fr 0.2fr;
+    align-items: center;
+    gap: 0.3rem;
+    width: 100%;
+  }
+
+  .logo {
+    justify-self: left;
+    margin-left: 1rem;
+    margin-bottom: 0.5rem;
+
+    a {
+      color: $secondary-text-color;
+      text-decoration: none;
+      font-size: $logo-font-size;
+      font-weight: bold;
+    }
+  }
+
+  .catalog-name-container {
+    justify-self: start;
+    padding-left: 1rem;
+    font-size: $header-font-size;
+    font-weight: bold;
+
+    h2 {
+      margin: 0;
+    }
+  }
+
+  .catalog-btn {
+    background-color: $primary-color;
+    color: $primary-text-color;
+    padding: 0.5rem 1.5rem 0.5rem 0.5rem;
+    border: none;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: $header-font-size;
+    position: relative;
+
+    height: 3rem;
+    text-overflow: ellipsis;
+
+
+    &:hover {
+      background-color: darken($primary-color, 10%);
+      transition: background-color 0.3s;
+    }
+
+    /* Псевдоэлемент для вогнутого эффекта */
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      right: -1.4rem;
+      transform: translateY(-50%);
+      width: 3rem;
+      height: 3rem;
+      background-color: $secondary-color;
+      border-top-left-radius: 50%;
+      border-bottom-left-radius: 50%;
+    }
+
+    svg {
+      stroke: $primary-text-color;
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+  }
+
+  .search-bar {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 3rem; /* Фиксированная высота для поиска */
+
+    font-size: $header-font-size;
+    background-color: $primary-color;
+    border-radius: 5rem;
+    z-index: 2;
+
+    .search-input {
+      width: 100%;
+      height: calc(100% - 0.4rem);
+      margin-left: 0.4rem;
+      padding: 0.5rem;
+      border: none;
+      border-radius: 5rem;
+      background-color: $background-color;
+      color: $background-text-color;
+      font-size: $header-font-size;
+      padding-left: 3%;
+
+      &:focus {
+        outline: none;
+      }
+
+      &::placeholder {
+        color: lighten($background-text-color, 20%);
+      }
+    }
+
+    .search-btn {
+      width: 3rem;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      background-color: $primary-color;
+      color: $primary-text-color;
+      border: none;
+      border-radius: 5rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+
+      svg {
+        stroke: $primary-text-color;
+        width: 1.5rem;
+        height: 1.5rem;
+      }
+    }
+  }
+
+  .profile-btn {
+    justify-self: end;
+    width: 3rem;
+    height: 3rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background-color: $primary-color;
+    color: $primary-text-color;
+    border: none;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+
+    &:hover {
+      background-color: darken($primary-color, 10%);
+    }
+
+    svg {
+      stroke: $primary-text-color;
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+  }
+
+  .cart-btn {
+    justify-self: end;
+    width: 3rem;
+    height: 3rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background-color: $primary-color;
+    color: $primary-text-color;
+    border: none;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+
+    &:hover {
+      background-color: darken($primary-color, 10%);
+    }
+
+    svg {
+      stroke: $primary-text-color;
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+    }
+
+    .logo {
+      margin: 0;
+
+      a {
+        font-size: 1.8rem;
+      }
+    }
+
+    .catalog-btn {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      width: 100%;
+      max-width: 320px;
+      justify-content: center;
+
+      &::after {
+        width: 0;
+        height: 0;
+      }
+
+      svg {
+        width: 1.2rem;
+        height: 1.2rem;
+      }
+    }
+
+    .search-bar {
+      display: flex;
+      width: 100%;
+      max-width: 320px;
+      height: 3.5rem;
+
+      .search-input {
+        flex-grow: 1;
+        height: 100%;
+        font-size: 1rem;
+        padding-left: 1rem;
+      }
+
+      .search-btn {
+        width: 3.5rem;
+        height: 100%;
+        border-radius: 0 1.75rem 1.75rem 0;
+
+        svg {
+          width: 1.5rem;
+          height: 1.5rem;
+        }
+      }
+    }
+
+    .profile-btn, .cart-btn {
+      width: 3.5rem;
+      height: 3.5rem;
+      margin: 0 0.25rem;
+
+      svg {
+        width: 1.3rem;
+        height: 1.3rem;
+      }
+    }
+
+    // Обернём кнопки профиля и корзины в отдельный контейнер для горизонтального расположения
+    .profile-cart-group {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      width: 100%;
+      max-width: 320px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .logo a {
+      font-size: 1.5rem;
+    }
+
+    .catalog-btn {
+      font-size: 0.9rem;
+      padding: 0.4rem 0.8rem;
+      max-width: 280px;
+
+      svg {
+        width: 1rem;
+        height: 1rem;
+      }
+    }
+
+    .search-bar {
+      max-width: 280px;
+      height: 3rem;
+
+      .search-input {
+        font-size: 0.9rem;
+        padding-left: 0.8rem;
+      }
+
+      .search-btn {
+        width: 3rem;
+
+        svg {
+          width: 1.2rem;
+          height: 1.2rem;
+        }
+      }
+    }
+
+    .profile-btn, .cart-btn {
+      width: 3rem;
+      height: 3rem;
+
+      svg {
+        width: 1rem;
+        height: 1rem;
+      }
+    }
+
+    .profile-cart-group {
+      max-width: 280px;
+    }
+  }
+}

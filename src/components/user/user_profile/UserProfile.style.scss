@@ -1,0 +1,1057 @@
+@import "/src/styles/variables";
+
+$border-radius-lg: 0.75rem;
+$border-radius-md: 0.5rem;
+$border-radius-sm: 0.75rem;
+$transition-standard: all 0.3s ease;
+$shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+$shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.1);
+$hover-color-delete: #D9534F;
+$hover-color-make-default: #d9b94f;
+$main-padding: 2rem;
+
+$button-font-size: 1.2rem;
+
+$red-color: #D9534F;
+
+.user-profile {
+  background-color: $background-color;
+  color: $background-text-color;
+  padding: $main-padding;
+  margin-top: 6rem;
+  margin-bottom: 2rem;
+  margin-inline: 2rem;
+  min-height: calc(100vh - 10rem);
+
+  .back-button-container {
+    margin-bottom: 1.5rem;
+
+    .back-button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background-color: transparent;
+      color: $background-text-color;
+      border: none;
+      cursor: pointer;
+      padding: 0.5rem 0;
+      font-size: $button-font-size;
+      transition: $transition-standard;
+
+      &:hover {
+        color: lighten($background-text-color, 20%);
+      }
+    }
+  }
+
+  .not-authenticated {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 50vh;
+    text-align: center;
+
+    h2 {
+      font-size: 1.5rem;
+      color: darken($background-text-color, 20%);
+    }
+  }
+
+  .profile-container {
+    display: flex;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+
+    .profile-sidebar {
+      flex: 0 0 300px;
+      background-color: lighten($background-color, 2%);
+      border-radius: $border-radius-lg;
+      padding: 1.5rem;
+      box-shadow: $shadow-md;
+      height: fit-content;
+
+      .profile-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid rgba($background-text-color, 0.1);
+
+        .profile-avatar {
+          width: 80px;
+          height: 80px;
+          background-color: $primary-color;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 0 auto 1rem;
+
+          svg {
+            color: $primary-text-color;
+          }
+        }
+
+        .profile-info {
+          h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+          }
+
+          p {
+            color: darken($background-text-color, 20%);
+            font-size: 0.9rem;
+          }
+        }
+      }
+
+      .profile-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+
+        .nav-item {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          padding: 0.75rem 1rem;
+          background-color: transparent;
+          color: $background-text-color;
+          border: none;
+          border-radius: $border-radius-md;
+          cursor: pointer;
+          transition: $transition-standard;
+          text-align: left;
+          font-size: 0.95rem;
+
+          &:hover {
+            box-shadow: 0 0 5px rgba($secondary-color, 0.8);
+            color: lighten($background-text-color, 20%);
+          }
+
+          &.active {
+            box-shadow: 0 0 5px rgba($secondary-color, 0.8);
+            background-color: $primary-color;
+            color: $primary-text-color;
+
+            svg {
+              color: $primary-text-color;
+            }
+          }
+          &.delete {
+
+            background-color: $red-color;
+            color: $background-color;
+            border-color: $red-color;
+            box-shadow: 0 0 8px rgba($red-color, 0.6);
+          }
+
+          svg {
+            flex-shrink: 0;
+          }
+        }
+      }
+    }
+
+    .profile-content {
+      flex: 1;
+      background-color: lighten($background-color, 2%);
+      border-radius: $border-radius-lg;
+      padding: 2rem;
+      box-shadow: $shadow-md;
+
+      h3 {
+        font-size: 2rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        color: $background-text-color;
+      }
+
+      // Overview Section
+      .overview-section {
+        .overview-cards {
+          justify-items: start;
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 1.5rem;
+
+
+          .info-card {
+            width: 100%;
+            height: 150px;
+            text-align: left;
+            background-color: $background-color;
+            padding: 1.5rem;
+            border-radius: $border-radius-md;
+            box-shadow: $shadow-sm;
+
+            h4 {
+              font-size: 1.5rem;
+              font-weight: 600;
+              margin-bottom: 1rem;
+              color: lighten($background-text-color, 20%);
+            }
+
+            p {
+              margin-bottom: 0.5rem;
+              line-height: 1.5;
+
+              strong {
+                color: $background-text-color;
+              }
+            }
+          }
+        }
+      }
+
+      .orders-section {
+        background-color: transparent;
+        padding: 2rem;
+        border-radius: $border-radius-lg;
+        color: $background-text-color;
+        max-width: 900px;
+        margin: 0 auto;
+
+        h3 {
+          font-size: 1.8rem;
+          font-weight: 600;
+          margin-bottom: 1.5rem;
+        }
+
+        .orders-tabs {
+          display: flex;
+          gap: 1rem;
+          margin-bottom: 1.5rem;
+
+          .tab {
+            background-color: transparent;
+            border: 2px solid transparent;
+            padding: 0.5rem 1.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: $primary-text-color;
+            border-radius: $border-radius-md;
+            cursor: pointer;
+            transition: $transition-standard;
+
+            &:hover {
+              background-color: $primary-color;
+            }
+
+            &.active {
+              background-color: $primary-color;
+              color: $primary-text-color;
+              border-color: $primary-color;
+              box-shadow: 0 0 8px rgba($primary-color, 0.6);
+            }
+          }
+        }
+
+        .order-filters {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 1rem 2rem;
+          margin-bottom: 2rem;
+          align-items: center;
+
+          label {
+            font-weight: 500;
+            margin-right: 0.5rem;
+            color: $background-text-color;
+            min-width: 60px;
+          }
+
+          select,
+          input[type="date"],
+          input[type="text"] {
+            padding: 0.4rem 0.75rem;
+            border: 1px solid rgba($background-text-color, 0.2);
+            border-radius: $border-radius-sm;
+            background-color: $background-color;
+            color: $background-text-color;
+            font-size: 1rem;
+            min-width: 150px;
+            transition: $transition-standard;
+
+            &:focus {
+              outline: none;
+              border-color: $secondary-text-color;
+              box-shadow: 0 0 5px rgba($secondary-color, 0.8);
+            }
+          }
+
+          input[type="text"] {
+            flex-grow: 1;
+            min-width: 200px;
+            max-width: 350px;
+          }
+        }
+
+        .order-list {
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+
+          .order-card {
+            background-color: $background-color;
+            border-radius: $border-radius-md;
+            padding: 1.5rem 2rem;
+            box-shadow: $shadow-sm;
+            transition: $transition-standard;
+            cursor: default;
+
+            h4 {
+              font-size: 1.3rem;
+              font-weight: 600;
+              margin-bottom: 0.8rem;
+              color: lighten($background-text-color, 20%);
+            }
+
+            p {
+              margin: 0.3rem 0;
+              font-size: 1rem;
+
+              &:first-letter {
+                text-transform: uppercase;
+              }
+            }
+
+            &:hover {
+              box-shadow: $shadow-md;
+              background-color: lighten($background-color, 5%);
+            }
+          }
+        }
+
+        p {
+          color: darken($background-text-color, 20%);
+          font-style: italic;
+          text-align: center;
+          margin-top: 1rem;
+        }
+      }
+
+
+      // Form Sections
+      .personal-section,
+      .email-section,
+      .password-section {
+        max-width: 500px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .personal-form,
+      .email-form,
+      .password-form {
+        width: 100%;
+        .form-group {
+          margin-bottom: 1.5rem;
+          justify-content: start;
+          align-items: start;
+          text-align: start;
+
+          label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: $background-text-color;
+          }
+
+          input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid rgba($background-text-color, 0.2);
+            border-radius: $border-radius-md;
+            background-color: $background-color;
+            color: $background-text-color;
+            font-size: 1rem;
+            transition: $transition-standard;
+
+            &:focus {
+              outline: none;
+              border-color: $secondary-text-color;
+              box-shadow: 0 0 5px rgba($secondary-color, 0.8);
+            }
+
+            &.error {
+              border-color: $error-color;
+            }
+
+            &:disabled {
+              background-color: darken($background-color, 5%);
+              color: darken($background-text-color, 30%);
+              cursor: not-allowed;
+            }
+          }
+
+          .error-text {
+            display: block;
+            color: $error-color;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+          }
+        }
+
+        .password-input {
+          position: relative;
+
+          input {
+            padding-right: 3rem;
+          }
+
+          .password-toggle {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: darken($background-text-color, 20%);
+            cursor: pointer;
+            transition: $transition-standard;
+
+            &:hover {
+              color: $background-text-color;
+            }
+          }
+        }
+      }
+
+      // Verification Form
+      .verification-form {
+        text-align: center;
+
+        p {
+          margin-bottom: 1.5rem;
+          color: darken($background-text-color, 20%);
+        }
+
+        .code-inputs {
+          display: flex;
+          justify-content: center;
+          gap: 0.5rem;
+          margin-bottom: 1rem;
+
+          .code-input {
+            width: 50px;
+            height: 60px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 600;
+            border: 2px solid rgba($background-text-color, 0.2);
+            border-radius: $border-radius-md;
+            background-color: $background-color;
+            color: $background-text-color;
+            transition: $transition-standard;
+
+            &:focus {
+              outline: none;
+              border-color: $secondary-text-color;
+              box-shadow: 0 0 5px rgba($secondary-color, 0.8);
+            }
+          }
+        }
+
+        .error-text {
+          color: $error-color;
+          font-size: 0.875rem;
+          margin-bottom: 1rem;
+        }
+      }
+
+      // Cards Section
+      .cards-section {
+        max-width: 700px;
+        margin-inline:8rem;
+
+        .cards-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 2rem;
+
+          .add-card-button {
+            justify-self: end;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: $primary-color;
+            color: $primary-text-color;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: $border-radius-md;
+            cursor: pointer;
+            font-weight: 500;
+            transition: $transition-standard;
+            font-size: $button-font-size;
+
+            &:hover {
+              background-color: darken($primary-color, 10%);
+            }
+          }
+        }
+
+        .card-form {
+          background-color: lighten($background-color, 3%);
+          padding: 2rem;
+          border-radius: $border-radius-md;
+          box-shadow: $shadow-md;
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+          margin-bottom: 2rem;
+
+          .form-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+
+            label {
+              font-weight: 500;
+              margin-bottom: 0.5rem;
+              color: $background-text-color;
+            }
+
+            input:not([type='checkbox']) {
+              width: 100%;
+              padding: 0.75rem 1rem;
+              border: 1px solid rgba($background-text-color, 0.2);
+              border-radius: $border-radius-md;
+              background-color: $background-color;
+              color: $background-text-color;
+              font-size: 1rem;
+              transition: $transition-standard;
+
+              &:focus {
+                border-color: $secondary-text-color;
+                box-shadow: 0 0 5px rgba($secondary-color, 0.8);
+                outline: none;
+              }
+
+              &.error {
+                border-color: $error-color;
+              }
+            }
+
+            .error-text {
+              margin-top: 0.25rem;
+              font-size: 0.875rem;
+              color: $error-color;
+            }
+          }
+
+          .form-row {
+            display: flex;
+            gap: 1.5rem;
+
+            .form-group {
+              flex: 1;
+            }
+          }
+
+          .checkbox-group {
+            display: flex;
+            align-items: center;
+
+            .checkbox-label {
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+              font-size: 0.95rem;
+              color: $background-text-color;
+
+              input[type="checkbox"] {
+                accent-color: $primary-color;
+                cursor: pointer;
+              }
+            }
+          }
+
+          .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1rem;
+
+            .secondary-button,
+            .submit-button {
+              padding: 0.75rem 1.5rem;
+              font-size: 1rem;
+              border-radius: $border-radius-md;
+              border: none;
+              cursor: pointer;
+              transition: $transition-standard;
+              font-weight: 500;
+            }
+
+            .secondary-button {
+              background-color: transparent;
+              color: $background-text-color;
+
+              &:hover {
+                color: lighten($background-text-color, 20%);
+                text-decoration: underline;
+              }
+            }
+
+            .submit-button {
+              background-color: $primary-color;
+              color: $primary-text-color;
+
+              &:hover {
+                background-color: darken($primary-color, 10%);
+              }
+            }
+          }
+        }
+
+        .cards-list {
+          .no-cards {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: darken($background-text-color, 30%);
+
+            svg {
+              margin-bottom: 1rem;
+              opacity: 0.5;
+            }
+
+            p {
+              font-size: 1.1rem;
+            }
+          }
+
+          .payment-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: $background-color;
+            padding: 1.5rem;
+            border-radius: $border-radius-md;
+            margin-bottom: 1rem;
+            box-shadow: $shadow-sm;
+            border: 2px solid transparent;
+            transition: $transition-standard;
+
+            &.default {
+              border-color: $primary-color;
+              background-color: rgba($primary-color, 0.05);
+            }
+
+            &:hover {
+              box-shadow: $shadow-md;
+            }
+
+            .card-info {
+              flex: 1;
+
+              .card-number {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                margin-bottom: 0.5rem;
+                font-size: 1.1rem;
+                font-weight: 600;
+
+                .card-icon {
+                  font-size: 1.5rem;
+                }
+
+                .default-badge {
+                  background-color: $primary-color;
+                  color: $primary-text-color;
+                  padding: 0.25rem 0.5rem;
+                  border-radius: $border-radius-sm;
+                  font-size: 0.75rem;
+                  font-weight: 500;
+                }
+              }
+
+              .card-details {
+                color: darken($background-text-color, 20%);
+                font-size: 0.9rem;
+
+                p {
+                  margin: 0;
+                  line-height: 1.4;
+                }
+              }
+            }
+
+            .card-actions {
+              display: flex;
+              gap: 0.5rem;
+
+              .make-default-button,
+              .delete-button {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 36px;
+                height: 36px;
+                border: none;
+                border-radius: $border-radius-sm;
+                cursor: pointer;
+                transition: $transition-standard;
+                font-size: $button-font-size;
+
+                svg{
+                  width: 1.5rem;
+                  height: 1.5rem;
+                }
+              }
+
+              .make-default-button {
+                background-color: transparent;
+                color: darken($background-text-color, 20%);
+                font-size: $button-font-size;
+
+                &:hover {
+                  box-shadow: 0 0 5px rgba($secondary-color, 0.8);
+                  color: $hover-color-make-default;
+                }
+              }
+
+              .delete-button {
+                background-color: transparent;
+                color: darken($background-text-color, 20%);
+                font-size: $button-font-size;
+
+                &:hover {
+                  box-shadow: 0 0 5px rgba($secondary-color, 0.8);
+                  color: $hover-color-delete;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // Form Actions
+      .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+      }
+
+      .submit-button {
+        background-color: $primary-color;
+        color: $primary-text-color;
+        padding: 0.75rem 2rem;
+        border: none;
+        border-radius: $border-radius-md;
+        cursor: pointer;
+        font-weight: 500;
+        transition: $transition-standard;
+        font-size: $button-font-size;
+
+        &:hover {
+          background-color: darken($primary-color, 10%);
+        }
+
+        &:disabled {
+          background-color: darken($background-color, 10%);
+          color: darken($background-text-color, 40%);
+          cursor: not-allowed;
+        }
+      }
+
+      .secondary-button {
+        background-color: transparent;
+        color: $background-text-color;
+        padding: 0.75rem 2rem;
+        border: 1px solid rgba($background-text-color, 0.3);
+        border-radius: $border-radius-md;
+        cursor: pointer;
+        font-weight: 500;
+        transition: $transition-standard;
+        font-size: $button-font-size;
+
+        &:hover {
+          background-color: rgba($background-text-color, 0.05);
+        }
+      }
+    }
+  }
+}
+
+.delete-section{
+  background-color: transparent;
+  color: $background-text-color;
+  padding: 2rem;
+  border-radius: $border-radius-lg;
+  max-width: 100%;
+
+  h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: $background-text-color;
+  }
+
+  .form-wrapper {
+    max-width: 800px;
+
+    .form-group {
+      margin-bottom: 1.5rem;
+      text-align: start;
+
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: $background-text-color;
+      }
+
+      input,
+      textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid rgba($background-text-color, 0.2);
+        border-radius: $border-radius-md;
+        background-color: $background-color;
+        color: $background-text-color;
+        font-size: 1rem;
+        transition: $transition-standard;
+        resize: vertical;
+
+        &:focus {
+          outline: none;
+          border-color: $secondary-text-color;
+          box-shadow: 0 0 5px rgba($secondary-color, 0.8);
+        }
+
+        &.error {
+          border-color: $error-color;
+        }
+      }
+
+      textarea{
+        min-height: 100px;
+      }
+
+      .error-text {
+        color: $error-color;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+      }
+    }
+
+    .disclaimer{
+      color:$red-color;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+
+      .submit-button {
+        padding: 0.75rem 1.5rem;
+        background-color: $primary-color;
+        color: $primary-text-color;
+        border: none;
+        border-radius: $border-radius-md;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 500;
+        transition: $transition-standard;
+
+        &:hover {
+          background-color: darken($primary-color, 10%);
+        }
+
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+      }
+
+      .delete-button {
+        padding: 0.75rem 1.5rem;
+        background-color: $red-color;
+        color: $background-color;
+        border: none;
+        border-radius: $border-radius-md;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 500;
+        transition: $transition-standard;
+
+        &:hover {
+          background-color: darken($red-color, 10%);
+        }
+
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+      }
+
+
+      .cancel-button {
+        padding: 0.75rem 1.5rem;
+        background-color: transparent;
+        color: $background-text-color;
+        border: none;
+        border-radius: $border-radius-md;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 500;
+        transition: $transition-standard;
+
+        &:hover {
+          color: lighten($background-text-color, 20%);
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 1024px) {
+  .user-profile {
+    margin-inline: 1rem;
+
+    .profile-container {
+      flex-direction: column;
+      gap: 1.5rem;
+
+      .profile-sidebar {
+        flex: none;
+
+        .profile-header {
+          display: flex;
+          align-items: center;
+          text-align: left;
+          gap: 1rem;
+
+          .profile-avatar {
+            margin: 0;
+          }
+        }
+
+        .profile-nav {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+          gap: 0.5rem;
+        }
+      }
+
+      .profile-content {
+        padding: 1.5rem;
+
+        .overview-section {
+          .overview-cards {
+            grid-template-columns: 1fr;
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .user-profile {
+    padding: 1rem;
+    margin-top: 5rem;
+
+    .profile-container {
+      .profile-sidebar {
+        padding: 1rem;
+
+        .profile-nav {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .profile-content {
+        padding: 1rem;
+
+        .cards-section {
+          .cards-header {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: stretch;
+
+            .add-card-button {
+              justify-content: center;
+            }
+          }
+
+          .card-form {
+            .form-row {
+              grid-template-columns: 1fr;
+            }
+          }
+
+          .cards-list {
+            .payment-card {
+              flex-direction: column;
+              align-items: stretch;
+              gap: 1rem;
+
+              .card-actions {
+                justify-content: center;
+              }
+            }
+          }
+        }
+
+        .verification-form {
+          .code-inputs {
+            .code-input {
+              width: 40px;
+              height: 50px;
+              font-size: 1.25rem;
+            }
+          }
+        }
+
+        .form-actions {
+          flex-direction: column;
+
+          .submit-button,
+          .secondary-button {
+            width: 100%;
+            justify-content: center;
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .user-profile {
+    padding: 0.5rem;
+
+    .profile-container {
+      .profile-content {
+        h3 {
+          font-size: 1.25rem;
+        }
+
+        .verification-form {
+          .code-inputs {
+            gap: 0.25rem;
+
+            .code-input {
+              width: 35px;
+              height: 45px;
+              font-size: 1.1rem;
+            }
+          }
+        }
+      }
+    }
+  }
+}

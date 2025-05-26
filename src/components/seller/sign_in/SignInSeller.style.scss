@@ -1,0 +1,218 @@
+@import "/src/styles/variables";
+
+$_background-color: $background-color;
+$_background-text-color: $background-text-color;
+
+$_buttons-color: $secondary-color;
+$_buttons-text-color: $secondary-text-color;
+$_h-font-size: 1.6875rem;
+$_font-size: 16px;
+
+.signIn-seller {
+  color: $_background-text-color;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1000;
+  overflow-y: auto;
+
+  a{
+    font-size: 1rem;
+    margin-top: 1rem;
+    cursor: pointer;
+  }
+
+  .step {
+    width: 100%;
+    max-width: 420px;
+    min-height: 300px;
+    padding: 20px;
+    background-color: $_background-color;
+    border-radius: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    font-size: $_h-font-size;
+
+    .close-button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: $_background-color;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: none;
+      transition: background-color 0.3s;
+
+      svg {
+        stroke: $_background-text-color;
+        fill: none;
+      }
+    }
+
+    h2 {
+      margin-top: 0;
+      margin-bottom: 2rem;
+    }
+
+    h2:not(.h-signIn){
+      font-size: 1.4rem;
+    }
+
+    .h-signIn{
+      font-size: 2rem;
+    }
+
+    input {
+      background-color: $_background-color;
+      color: $_background-text-color;
+      border: 1px solid $secondary-text-color;
+      box-shadow: 0 0 5px rgba($secondary-color, 0.5);
+      outline: none;
+      padding: 10px;
+      margin-bottom: 10px;
+      width: 100%;
+      border-radius: 8px;
+      font-size: 1.4rem;
+
+      &:focus{
+        box-shadow: 0 0 5px rgba($secondary-color, 0.8);
+      }
+    }
+
+    .code-inputs {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+
+      .code-input {
+        width: 40px;
+        height: 50px;
+        font-size: 1.5rem;
+        text-align: center;
+        border: 1px solid $secondary-text-color;
+        border-radius: 8px;
+        background-color: $_background-color;
+        color: $_background-text-color;
+        box-shadow: 0 0 5px rgba($secondary-color, 0.5);
+
+        &:focus {
+          outline: none;
+          border-color: $secondary-text-color;
+          box-shadow: 0 0 5px rgba($secondary-color, 0.8);
+        }
+      }
+    }
+
+    .text-invisible-color{
+      user-select: none;
+      color: transparent;
+      font-size: 1.4rem;
+      margin-bottom: 2rem;
+    }
+
+    .text-error-color {
+      color: $error-color;
+      font-size: 1.4rem;
+      margin-bottom: 2rem;
+    }
+
+    .flex {
+      flex-grow: 1; /* Растягиваем кнопки, чтобы они были внизу */
+      align-items: flex-end;
+    }
+
+    button:not(.close-button) {
+      background-color: $_buttons-color;
+      color: $_buttons-text-color;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 0.75rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      font-size: $_font-size;
+      margin-top: 1rem;
+
+      &:hover {
+        background-color: darken($_buttons-color, 10%);
+      }
+    }
+
+    .pare-button{
+      margin-inline: 2rem;
+    }
+
+    .input-with-button {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+
+      input {
+        flex: 1;
+        background-color: $_background-color;
+        color: $_background-text-color;
+        border: 1px solid $secondary-text-color;
+        box-shadow: 0 0 5px rgba($secondary-color, 0.5);
+        outline: none;
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 1.4rem;
+        height: 50px;
+        box-sizing: border-box;
+        margin: 0;
+
+        &:focus {
+          outline: none;
+          border-color: $secondary-text-color;
+          box-shadow: 0 0 5px rgba($secondary-color, 0.8);
+        }
+      }
+
+      .eye-btn {
+        vertical-align: middle;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: transparent;
+        color: $background-text-color;
+        border: none;
+        border-radius: 0.75rem;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        flex-shrink: 0;
+        padding: 0;
+        margin-top: 0;
+
+        svg {
+          stroke: $background-text-color;
+          width: 2rem;
+          height: 2rem;
+        }
+
+        &:hover{
+          background-color: transparent;
+        }
+      }
+    }
+  }
+}
+
+
+

@@ -1,23 +1,20 @@
 import './App.scss'
 import * as React from "react";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import UserLayout from "./layout/UserLayout.component.tsx";
+import SellerLayout from "./layout/SellerLayout.component.tsx";
 
-const App: React.FC = () =>{
+const App: React.FC = () => {
+    return (
+        <Router>
+            <Routes>
+                <Route path="/*" element={<UserLayout />} />
+                <Route path="/seller/*" element={<SellerLayout />} />
+                {/*<Route path="/pickup-point/*" element={<PickupPointLayout />} />*/}
+            </Routes>
+        </Router>
+    );
+};
 
+export default App;
 
-    return(
-        <div className={"app"}>
-            <h1 className={"h1-test"}>
-                Market
-            </h1>
-            <h1 className={"h2-test"}>
-                Market
-            </h1>
-            <h1 className={"h1-test"}>
-                Лохнутый лох пишет фронт
-            </h1>
-
-        </div>
-    )
-}
-
-export default App
