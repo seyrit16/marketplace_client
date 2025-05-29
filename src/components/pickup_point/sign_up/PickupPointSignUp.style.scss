@@ -8,7 +8,7 @@ $_buttons-text-color: $secondary-text-color;
 $_h-font-size: 1.6875rem;
 $_font-size: 16px;
 
-.signIn-seller {
+.signup-pickup-point-form {
   background: rgba(0, 0, 0, 0.5);
   color: $_background-text-color;
   min-height: 100vh;
@@ -24,7 +24,7 @@ $_font-size: 16px;
   z-index: 1000;
   overflow-y: auto;
 
-  a{
+  a {
     font-size: 1rem;
     margin-top: 1rem;
     cursor: pointer;
@@ -65,16 +65,17 @@ $_font-size: 16px;
       }
     }
 
+
     h2 {
       margin-top: 0;
       margin-bottom: 2rem;
     }
 
-    h2:not(.h-signIn){
+    h2:not(.reg) {
       font-size: 1.4rem;
     }
 
-    .h-signIn{
+    .reg {
       font-size: 2rem;
     }
 
@@ -90,9 +91,14 @@ $_font-size: 16px;
       border-radius: 8px;
       font-size: 1.4rem;
 
-      &:focus{
+      &:focus {
         box-shadow: 0 0 5px rgba($secondary-color, 0.8);
       }
+    }
+
+    .field-group {
+
+
     }
 
     .code-inputs {
@@ -119,7 +125,7 @@ $_font-size: 16px;
       }
     }
 
-    .text-invisible-color{
+    .text-invisible-color {
       user-select: none;
       color: transparent;
       font-size: 1.4rem;
@@ -133,7 +139,7 @@ $_font-size: 16px;
     }
 
     .flex {
-      flex-grow: 1; /* Растягиваем кнопки, чтобы они были внизу */
+      flex-grow: 1;
       align-items: flex-end;
     }
 
@@ -146,14 +152,13 @@ $_font-size: 16px;
       cursor: pointer;
       transition: background-color 0.3s;
       font-size: $_font-size;
-      margin-top: 1rem;
 
       &:hover {
         background-color: darken($_buttons-color, 10%);
       }
     }
 
-    .pare-button{
+    .pare-button {
       margin-inline: 2rem;
     }
 
@@ -199,7 +204,6 @@ $_font-size: 16px;
         transition: background-color 0.3s;
         flex-shrink: 0;
         padding: 0;
-        margin-top: 0;
 
         svg {
           stroke: $background-text-color;
@@ -207,12 +211,56 @@ $_font-size: 16px;
           height: 2rem;
         }
 
-        &:hover{
+        &:hover {
           background-color: transparent;
         }
       }
     }
   }
+}
+
+.desc-textarea {
+  background-color: $_background-color !important;
+  color: $_background-text-color !important;
+  border: 1px solid $secondary-text-color !important;
+  box-shadow: 0 0 5px rgba($secondary-color, 0.5);
+  outline: none !important;
+  padding: 12px 14px !important;
+  margin-bottom: 16px !important;
+  width: 100% !important;
+  border-radius: 0.75rem !important;
+  font-size: 1rem !important;
+  line-height: 1.5 !important;
+  font-family: inherit !important;
+  resize: vertical !important;
+  min-height: 100px !important;
+  transition: box-shadow 0.2s, border-color 0.2s !important;
+
+  &:focus {
+    box-shadow: 0 0 5px rgba($secondary-color, 0.8);
+    border-color: $secondary-color;
+  }
+
+  &:disabled {
+    background-color: lighten($_background-color, 5%);
+    color: rgba($_background-text-color, 0.5);
+    cursor: not-allowed;
+  }
+}
+
+
+// Дополнительные утилитарные классы
+.field-hint {
+  font-size: 0.9rem;
+  color: rgba($_background-text-color, 0.7);
+  margin-top: -8px;
+  margin-bottom: 12px;
+  font-style: italic;
+}
+
+.required-asterisk {
+  color: $error-color;
+  margin-left: 2px;
 }
 
 

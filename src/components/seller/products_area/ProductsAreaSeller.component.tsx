@@ -1,23 +1,11 @@
-import React, {useEffect} from 'react';
-import "./SearchProductArea.style.scss";
+import React from "react";
+import {useNavigate} from "react-router-dom";
 import {createDefaultProduct, type Product} from "../../../models/Product.model.ts";
-import ProductCard from "../product_card/ProductCard.component.tsx";
-import {useNavigate, useParams} from 'react-router-dom';
-import {useCatalog} from "../../../context/CatalogContext.tsx";
+import "./ProductsAreaSeller.style.scss"
+import ProductCardSeller from "./card/ProductCardSeller.component.tsx";
 
-const SearchProductArea: React.FC = () => {
+const ProductsAreaSeller: React.FC = () => {
     const navigate = useNavigate();
-    const { categoryId } = useParams<{ categoryId: string }>();
-    const {getCategory} = useCatalog();
-
-    const category = categoryId ? getCategory(parseInt(categoryId)) : null;
-
-    useEffect(() => {
-        if (category) {
-            // тут может быть логика фильтрации товаров по категории
-            console.log("Выбрана категория:", category.name);
-        }
-    }, [category]);
 
     const products: Product[] = [
         createDefaultProduct(
@@ -88,16 +76,16 @@ const SearchProductArea: React.FC = () => {
 
     const handleProductSelect = (product: Product) => {
 
-        navigate(`/product/${product.id}`);
+        navigate(`/seller/product/${product.id}`);
     };
 
     return (
-        <div className="product-section">
+        <div className="product-seller-section">
             <div className="product-grid-container">
                 <div className="container">
                     <div className="product-grid">
                         {products.map(product => (
-                            <ProductCard
+                            <ProductCardSeller
                                 key={product.id}
                                 product={product}
                                 onProductSelect={handleProductSelect}
@@ -110,4 +98,4 @@ const SearchProductArea: React.FC = () => {
     );
 };
 
-export default SearchProductArea;
+export default ProductsAreaSeller;

@@ -13,8 +13,8 @@ export interface OrderItem {
     id: string;
     orderId: string;
     productId: string;
-    productName?: string; // для отображения
-    productImage?: string; // для отображения
+    productName?: string;
+    productImage?: string;
     quantity: number;
     itemPrice: number;
     itemStatus: OrderItemStatus;
@@ -26,9 +26,9 @@ export interface Order {
     userId: string;
     fullPrice: number;
     pickupPointId: string;
-    pickupPointAddress?: string; // для отображения
+    pickupPointAddress?: string;
     items: OrderItem[];
-    createdAt: string; // ISO datetime string
+    createdAt: string;
 }
 
 export interface OrderFilters {
@@ -38,7 +38,6 @@ export interface OrderFilters {
     searchQuery?: string;
 }
 
-// Утилитарные функции для работы с заказами
 export const getOrderStatusText = (status: OrderItemStatus): string => {
     const statusTexts: Record<OrderItemStatus, string> = {
         [OrderItemStatus.NEW]: 'Новый',
@@ -79,10 +78,8 @@ export const isActiveOrder = (order: Order): boolean => {
 };
 
 export const getOrderMainStatus = (order: Order): OrderItemStatus => {
-    // Определяем основной статус заказа на основе статусов товаров
     const statuses = order.items.map(item => item.itemStatus);
 
-    // Приоритет статусов для определения основного
     const statusPriority: OrderItemStatus[] = [
         OrderItemStatus.NEW,
         OrderItemStatus.PROCESSING,
@@ -94,7 +91,6 @@ export const getOrderMainStatus = (order: Order): OrderItemStatus => {
         OrderItemStatus.REFUNDED
     ];
 
-    // Возвращаем первый найденный статус по приоритету
     for (const status of statusPriority) {
         if (statuses.includes(status)) {
             return status;
