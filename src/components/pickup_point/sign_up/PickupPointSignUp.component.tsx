@@ -1,61 +1,26 @@
 import React, { useState, useRef, useEffect } from 'react';
 import SvgSelector from '../../SvgSelector.component.tsx';
-import './SignUpSeller.style.scss';
-import {useNavigate} from "react-router-dom";
+import './PickupPointSignUp.style.scss';
+import type {PickupPointSignUpData,PickupPointCreateRequest} from '../../../models/PickupPoint.model.ts'
+import { useNavigate } from "react-router-dom";
 
-interface PersonDetail {
-    surname: string;
-    name: string;
-    patronimyc: string;
-    phoneNumber: string;
-}
-
-interface PaymentDetail {
-    bankAccountNumber: string;
-    bankName: string;
-    bic: string;
-    accountHolderName: string;
-    inn: string;
-}
-
-interface SellerCreateRequest {
-    person: PersonDetail;
-    fullCompanyName: string;
-    shortCompanyName: string;
-    description: string;
-    paymentDetail: PaymentDetail;
-}
-
-interface SellerSignUpData {
-    email: string;
-    password: string;
-    code: string;
-    sellerCreateRequest: SellerCreateRequest;
-}
-
-interface SellerSignUpErrors {
+interface PickupPointSignUpErrors {
     email?: string;
     password?: string;
     code?: string;
-    person?: {
-        surname?: string;
-        name?: string;
-        patronimyc?: string;
-        phoneNumber?: string;
+    address?: {
+        region?: string;
+        city?: string;
+        street?: string;
+        house?: string;
+        postalCode?: string;
     };
-    fullCompanyName?: string;
-    shortCompanyName?: string;
-    description?: string;
-    paymentDetail?: {
-        bankAccountNumber?: string;
-        bankName?: string;
-        bic?: string;
-        accountHolderName?: string;
-        inn?: string;
-    };
+    workingHours?: string;
+    phoneNumber?: string;
+    addInfo?: string;
 }
 
-const SellerSignUpForm: React.FC = () => {
+const PickupPointSignUp: React.FC = () => {
     const [step, setStep] = useState(1);
     const emailRef = useRef<HTMLInputElement | null>(null);
     const codeRef = useRef<HTMLInputElement | null>(null);
@@ -73,34 +38,38 @@ const SellerSignUpForm: React.FC = () => {
         }
     }, [step]);
 
-    const [formData, setFormData] = useState<SellerSignUpData>({
+    const [formData, setFormData] = useState<PickupPointSignUpData>({
         email: '',
         password: '',
         code: '',
-        sellerCreateRequest: {
-            person: {
-                surname: '',
-                name: '',
-                patronimyc: '',
-                phoneNumber: '',
+        pickupPointCreateRequest: {
+            id: '',
+            address: {
+                region: '',
+                city: '',
+                street: '',
+                house: '',
+                postalCode: '',
             },
-            fullCompanyName: '',
-            shortCompanyName: '',
-            description: '',
-            paymentDetail: {
-                bankAccountNumber: '',
-                bankName: '',
-                bic: '',
-                accountHolderName: '',
-                inn: '',
-            },
+            workingHours: '',
+            phoneNumber: '',
+            addInfo: '',
         },
     });
 
-    const [errors, setErrors] = useState<SellerSignUpErrors>({});
+    const [errors, setErrors] = useState<PickupPointSignUpErrors>({});
     const [codeInputs, setCodeInputs] = useState<string[]>(Array(6).fill(''));
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
     const [showPassword, setShowPassword] = useState(false);
+
+    // Генерация UUID для пункта выдачи
+    const generateUUID = () => {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            const r = Math.random() * 16 | 0;
+            const v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    };
 
     const validateEmail = (email: string) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -119,16 +88,9 @@ const SellerSignUpForm: React.FC = () => {
         return phoneRegex.test(phone) ? '' : 'Телефон должен быть в формате +7XXXXXXXXXX';
     };
 
-    const validateINN = (inn: string) => {
-        return inn.length === 10 && /^\d+$/.test(inn) ? '' : 'ИНН должен содержать 10 цифр';
-    };
-
-    const validateBIC = (bic: string) => {
-        return bic.length === 9 && /^\d+$/.test(bic) ? '' : 'БИК должен содержать 9 цифр';
-    };
-
-    const validateBankAccount = (account: string) => {
-        return account.length === 20 && /^\d+$/.test(account) ? '' : 'Номер счета должен содержать 20 цифр';
+    const validatePostalCode = (code: string) => {
+        const postalRegex = /^\d{6}$/;
+        return postalRegex.test(code) ? '' : 'Почтовый индекс должен содержать 6 цифр';
     };
 
     const validateRequired = (value: string, fieldName: string) => {
@@ -141,6 +103,11 @@ const SellerSignUpForm: React.FC = () => {
             : 'Все поля кода должны быть заполнены';
     };
 
+    const validateWorkingHours = (hours: string) => {
+        // Простая проверка на наличие содержимого
+        return hours.trim().length >= 5 ? '' : 'Укажите режим работы';
+    };
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
 
@@ -148,10 +115,10 @@ const SellerSignUpForm: React.FC = () => {
             const [parent, child] = name.split('.');
             setFormData(prev => ({
                 ...prev,
-                sellerCreateRequest: {
-                    ...prev.sellerCreateRequest,
+                pickupPointCreateRequest: {
+                    ...prev.pickupPointCreateRequest,
                     [parent]: {
-                        ...prev.sellerCreateRequest[parent as keyof SellerCreateRequest],
+                        ...prev.pickupPointCreateRequest[parent as keyof PickupPointCreateRequest],
                         [child]: value,
                     },
                 },
@@ -161,8 +128,8 @@ const SellerSignUpForm: React.FC = () => {
         } else {
             setFormData(prev => ({
                 ...prev,
-                sellerCreateRequest: {
-                    ...prev.sellerCreateRequest,
+                pickupPointCreateRequest: {
+                    ...prev.pickupPointCreateRequest,
                     [name]: value,
                 },
             }));
@@ -202,8 +169,8 @@ const SellerSignUpForm: React.FC = () => {
         e.preventDefault();
     };
 
-    const validateStep = (currentStep: number): SellerSignUpErrors => {
-        const stepErrors: SellerSignUpErrors = {};
+    const validateStep = (currentStep: number): PickupPointSignUpErrors => {
+        const stepErrors: PickupPointSignUpErrors = {};
 
         switch (currentStep) {
             case 1:
@@ -221,36 +188,33 @@ const SellerSignUpForm: React.FC = () => {
                 break;
 
             case 4:
-                stepErrors.person = {};
-                stepErrors.person.surname = validateRequired(formData.sellerCreateRequest.person.surname, 'Фамилия');
-                stepErrors.person.name = validateRequired(formData.sellerCreateRequest.person.name, 'Имя');
-                if (formData.sellerCreateRequest.person.phoneNumber) {
-                    stepErrors.person.phoneNumber = validatePhone(formData.sellerCreateRequest.person.phoneNumber);
+                stepErrors.address = {};
+                const addr = formData.pickupPointCreateRequest.address;
+                stepErrors.address.region = validateRequired(addr.region, 'Регион');
+                stepErrors.address.city = validateRequired(addr.city, 'Город');
+                stepErrors.address.street = validateRequired(addr.street, 'Улица');
+                stepErrors.address.house = validateRequired(addr.house, 'Дом');
+                if (addr.postalCode) {
+                    stepErrors.address.postalCode = validatePostalCode(addr.postalCode);
                 } else {
-                    stepErrors.person.phoneNumber = 'Телефон не должен быть пустым';
+                    stepErrors.address.postalCode = 'Почтовый индекс не должен быть пустым';
                 }
                 break;
 
             case 5:
-                stepErrors.fullCompanyName = validateRequired(formData.sellerCreateRequest.fullCompanyName, 'Полное название компании');
-                stepErrors.shortCompanyName = validateRequired(formData.sellerCreateRequest.shortCompanyName, 'Краткое название компании');
+                stepErrors.workingHours = validateWorkingHours(formData.pickupPointCreateRequest.workingHours);
+                if (formData.pickupPointCreateRequest.phoneNumber) {
+                    stepErrors.phoneNumber = validatePhone(formData.pickupPointCreateRequest.phoneNumber);
+                } else {
+                    stepErrors.phoneNumber = 'Телефон не должен быть пустым';
+                }
                 break;
-
-            case 6:
-                { stepErrors.paymentDetail = {};
-                const pd = formData.sellerCreateRequest.paymentDetail;
-                stepErrors.paymentDetail.bankName = validateRequired(pd.bankName, 'Название банка');
-                stepErrors.paymentDetail.bankAccountNumber = validateBankAccount(pd.bankAccountNumber);
-                stepErrors.paymentDetail.bic = validateBIC(pd.bic);
-                stepErrors.paymentDetail.accountHolderName = validateRequired(pd.accountHolderName, 'Владелец счета');
-                stepErrors.paymentDetail.inn = validateINN(pd.inn);
-                break; }
         }
 
         return stepErrors;
     };
 
-    const hasStepErrors = (stepErrors: SellerSignUpErrors): boolean => {
+    const hasStepErrors = (stepErrors: PickupPointSignUpErrors): boolean => {
         return Object.values(stepErrors).some(error => {
             if (typeof error === 'string') return error;
             if (typeof error === 'object' && error !== null) {
@@ -265,12 +229,22 @@ const SellerSignUpForm: React.FC = () => {
         setErrors(stepErrors);
 
         if (!hasStepErrors(stepErrors)) {
-            if (step < 6) {
+            if (step < 5) {
                 setStep(step + 1);
+                // Генерируем ID при переходе к последнему шагу
+                if (step === 4) {
+                    setFormData(prev => ({
+                        ...prev,
+                        pickupPointCreateRequest: {
+                            ...prev.pickupPointCreateRequest,
+                            id: generateUUID()
+                        }
+                    }));
+                }
             } else {
-                console.log('Seller registration data:', formData);
-                alert('Регистрация продавца успешна!');
-                navigate("/seller/sign_in")
+                console.log('Pickup point registration data:', formData);
+                alert('Регистрация пункта выдачи успешна!');
+                navigate("/pp/orders");
             }
         }
     };
@@ -284,23 +258,18 @@ const SellerSignUpForm: React.FC = () => {
             email: '',
             password: '',
             code: '',
-            sellerCreateRequest: {
-                person: {
-                    surname: '',
-                    name: '',
-                    patronimyc: '',
-                    phoneNumber: '',
+            pickupPointCreateRequest: {
+                id: '',
+                address: {
+                    region: '',
+                    city: '',
+                    street: '',
+                    house: '',
+                    postalCode: '',
                 },
-                fullCompanyName: '',
-                shortCompanyName: '',
-                description: '',
-                paymentDetail: {
-                    bankAccountNumber: '',
-                    bankName: '',
-                    bic: '',
-                    accountHolderName: '',
-                    inn: '',
-                },
+                workingHours: '',
+                phoneNumber: '',
+                addInfo: '',
             },
         });
         setCodeInputs(Array(6).fill(''));
@@ -316,14 +285,11 @@ const SellerSignUpForm: React.FC = () => {
     };
 
     return (
-        <div className="signup-form container mx-auto p-4 max-w-md">
+        <div className="signup-pickup-point-form container mx-auto p-4 max-w-md">
             {/* Step 1: Email */}
             {step === 1 && (
-                <div className="step seller-form">
-                    <h2 className="text-2xl mb-4 text-secondary-text reg">Регистрация продавца</h2>
-                    {/*<button className="close-button" onClick={handleClose}>*/}
-                    {/*    <SvgSelector id="cross" className="h-4 w-4" />*/}
-                    {/*</button>*/}
+                <div className="step pickup-form">
+                    <h2 className="text-2xl mb-4 text-secondary-text reg">Регистрация пункта выдачи</h2>
                     <h2 className="text-2xl mb-4 text-secondary-text">Введите электронную почту</h2>
                     <div className="field-group">
                         <input
@@ -340,14 +306,14 @@ const SellerSignUpForm: React.FC = () => {
                     <button onClick={handleNext} className="mt-4 px-4 py-2 rounded bg-secondary-color text-secondary-text">
                         Далее
                     </button>
-                    <a role={"button"} onClick={()=>{navigate("/seller/sign_in")}}>Уже есть аккаунт?</a>
+                    <a role={"button"} onClick={() => { navigate("/pp/sign_in") }}>Уже есть аккаунт?</a>
                 </div>
             )}
 
             {/* Step 2: Verification Code */}
             {step === 2 && (
-                <div className="step seller-form">
-                    <h2 className="text-2xl mb-4 text-secondary-text reg">Регистрация продавца</h2>
+                <div className="step pickup-form">
+                    <h2 className="text-2xl mb-4 text-secondary-text reg">Регистрация пункта выдачи</h2>
                     <button className="close-button" onClick={handleClose}>
                         <SvgSelector id="cross" className="h-4 w-4" />
                     </button>
@@ -386,8 +352,8 @@ const SellerSignUpForm: React.FC = () => {
 
             {/* Step 3: Password */}
             {step === 3 && (
-                <div className="step seller-form">
-                    <h2 className="text-2xl mb-4 text-secondary-text reg">Регистрация продавца</h2>
+                <div className="step pickup-form">
+                    <h2 className="text-2xl mb-4 text-secondary-text reg">Регистрация пункта выдачи</h2>
                     <button className="close-button" onClick={handleClose}>
                         <SvgSelector id="cross" className="h-4 w-4" />
                     </button>
@@ -412,7 +378,7 @@ const SellerSignUpForm: React.FC = () => {
                             </button>
                         </div>
                         {errors.password && <p className="text-error-color">{errors.password}</p>}
-                        <div className="field-hint">Минимум 8 символов, включая буквы и цифры</div>
+                        <div className="field-hint">Минимум 10 символов, включая буквы и цифры</div>
                     </div>
                     <div className="flex justify-between mt-4">
                         <button onClick={handleBack} className="pare-button px-4 py-2 rounded bg-gray-300 text-primary-text">
@@ -425,192 +391,134 @@ const SellerSignUpForm: React.FC = () => {
                 </div>
             )}
 
-            {/* Step 4: Personal Information */}
+            {/* Step 4: Address Information */}
             {step === 4 && (
-                <div className="step seller-form">
-                    <h2 className="text-2xl mb-4 text-secondary-text reg">Регистрация продавца</h2>
+                <div className="step pickup-form">
+                    <h2 className="text-2xl mb-4 text-secondary-text reg">Регистрация пункта выдачи</h2>
                     <button className="close-button" onClick={handleClose}>
                         <SvgSelector id="cross" className="h-4 w-4" />
                     </button>
-                    <h2 className="text-2xl mb-4 text-secondary-text">Личная информация</h2>
+                    <h2 className="text-2xl mb-4 text-secondary-text">Адрес пункта выдачи</h2>
 
                     <div className="field-group">
                         <input
                             type="text"
-                            name="person.surname"
-                            value={formData.sellerCreateRequest.person.surname}
+                            name="address.region"
+                            value={formData.pickupPointCreateRequest.address.region}
                             onChange={handleChange}
-                            placeholder="Фамилия *"
+                            placeholder="Регион *"
                             className="w-full p-2 mb-2 border rounded bg-primary-color text-primary-text"
                         />
-                        {errors.person?.surname && <p className="text-error-color">{errors.person.surname}</p>}
+                        {errors.address?.region && <p className="text-error-color">{errors.address.region}</p>}
                     </div>
 
                     <div className="field-group">
                         <input
                             type="text"
-                            name="person.name"
-                            value={formData.sellerCreateRequest.person.name}
+                            name="address.city"
+                            value={formData.pickupPointCreateRequest.address.city}
                             onChange={handleChange}
-                            placeholder="Имя *"
+                            placeholder="Город *"
                             className="w-full p-2 mb-2 border rounded bg-primary-color text-primary-text"
                         />
-                        {errors.person?.name && <p className="text-error-color">{errors.person.name}</p>}
+                        {errors.address?.city && <p className="text-error-color">{errors.address.city}</p>}
                     </div>
 
                     <div className="field-group">
                         <input
                             type="text"
-                            name="person.patronimyc"
-                            value={formData.sellerCreateRequest.person.patronimyc}
+                            name="address.street"
+                            value={formData.pickupPointCreateRequest.address.street}
                             onChange={handleChange}
-                            placeholder="Отчество"
+                            placeholder="Улица *"
                             className="w-full p-2 mb-2 border rounded bg-primary-color text-primary-text"
                         />
+                        {errors.address?.street && <p className="text-error-color">{errors.address.street}</p>}
+                    </div>
+
+                    <div className="field-group">
+                        <input
+                            type="text"
+                            name="address.house"
+                            value={formData.pickupPointCreateRequest.address.house}
+                            onChange={handleChange}
+                            placeholder="Дом *"
+                            className="w-full p-2 mb-2 border rounded bg-primary-color text-primary-text"
+                        />
+                        {errors.address?.house && <p className="text-error-color">{errors.address.house}</p>}
+                    </div>
+
+                    <div className="field-group">
+                        <input
+                            type="text"
+                            name="address.postalCode"
+                            value={formData.pickupPointCreateRequest.address.postalCode}
+                            onChange={handleChange}
+                            placeholder="Почтовый индекс *"
+                            maxLength={6}
+                            className="w-full p-2 mb-2 border rounded bg-primary-color text-primary-text"
+                        />
+                        <div className="field-hint">Формат: 123456 (6 цифр)</div>
+                        {errors.address?.postalCode && <p className="text-error-color">{errors.address.postalCode}</p>}
+                    </div>
+
+                    <div className="flex justify-between mt-4">
+                        <button onClick={handleBack} className="pare-button px-4 py-2 rounded bg-gray-300 text-primary-text">
+                            Назад
+                        </button>
+                        <button onClick={handleNext} className="pare-button px-4 py-2 rounded bg-secondary-color text-secondary-text">
+                            Далее
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Step 5: Working Hours and Contact Info */}
+            {step === 5 && (
+                <div className="step pickup-form" onKeyDown={handleOnKeyDown}>
+                    <h2 className="text-2xl mb-4 text-secondary-text reg">Регистрация пункта выдачи</h2>
+                    <button className="close-button" onClick={handleClose}>
+                        <SvgSelector id="cross" className="h-4 w-4" />
+                    </button>
+                    <h2 className="text-2xl mb-4 text-secondary-text">Контактная информация</h2>
+
+                    <div className="field-group">
+                        <input
+                            type="text"
+                            name="workingHours"
+                            value={formData.pickupPointCreateRequest.workingHours}
+                            onChange={handleChange}
+                            placeholder="Режим работы *"
+                            className="w-full p-2 mb-2 border rounded bg-primary-color text-primary-text"
+                        />
+                        <div className="field-hint">Например: Пн-Пт: 9:00-18:00, Сб: 10:00-16:00</div>
+                        {errors.workingHours && <p className="text-error-color">{errors.workingHours}</p>}
                     </div>
 
                     <div className="field-group">
                         <input
                             type="tel"
-                            name="person.phoneNumber"
-                            value={formData.sellerCreateRequest.person.phoneNumber}
+                            name="phoneNumber"
+                            value={formData.pickupPointCreateRequest.phoneNumber}
                             onChange={handleChange}
                             placeholder="Телефон *"
                             className="w-full p-2 mb-2 border rounded bg-primary-color text-primary-text"
                         />
                         <div className="field-hint">Формат: +7XXXXXXXXXX</div>
-                        {errors.person?.phoneNumber && <p className="text-error-color">{errors.person.phoneNumber}</p>}
-                    </div>
-
-                    <div className="flex justify-between mt-4">
-                        <button onClick={handleBack} className="pare-button px-4 py-2 rounded bg-gray-300 text-primary-text">
-                            Назад
-                        </button>
-                        <button onClick={handleNext} className="pare-button px-4 py-2 rounded bg-secondary-color text-secondary-text">
-                            Далее
-                        </button>
-                    </div>
-                </div>
-            )}
-
-            {/* Step 5: Company Information */}
-            {step === 5 && (
-                <div className="step seller-form">
-                    <h2 className="text-2xl mb-4 text-secondary-text reg">Регистрация продавца</h2>
-                    <button className="close-button" onClick={handleClose}>
-                        <SvgSelector id="cross" className="h-4 w-4" />
-                    </button>
-                    <h2 className="text-2xl mb-4 text-secondary-text">Информация о компании</h2>
-
-                    <div className="field-group">
-                        <input
-                            type="text"
-                            name="fullCompanyName"
-                            value={formData.sellerCreateRequest.fullCompanyName}
-                            onChange={handleChange}
-                            placeholder="Полное название компании *"
-                            className="w-full p-2 mb-2 border rounded bg-primary-color text-primary-text"
-                        />
-                        {errors.fullCompanyName && <p className="text-error-color">{errors.fullCompanyName}</p>}
-                    </div>
-
-                    <div className="field-group">
-                        <input
-                            type="text"
-                            name="shortCompanyName"
-                            value={formData.sellerCreateRequest.shortCompanyName}
-                            onChange={handleChange}
-                            placeholder="Краткое название компании *"
-                            className="w-full p-2 mb-2 border rounded bg-primary-color text-primary-text"
-                        />
-                        {errors.shortCompanyName && <p className="text-error-color">{errors.shortCompanyName}</p>}
+                        {errors.phoneNumber && <p className="text-error-color">{errors.phoneNumber}</p>}
                     </div>
 
                     <div className="field-group">
                         <textarea
-                            name="description"
-                            value={formData.sellerCreateRequest.description}
+                            name="addInfo"
+                            value={formData.pickupPointCreateRequest.addInfo}
                             onChange={handleChange}
-                            placeholder="Описание"
+                            placeholder="Дополнительная информация"
                             rows={4}
                             className="desc-textarea"
                         />
-                        <div className="field-hint">Опишите основное направление деятельности вашей компании</div>
-                        {errors.description && <p className="text-error-color">{errors.description}</p>}
+                        <div className="field-hint">Укажите дополнительную информацию о пункте выдачи (опционально)</div>
                     </div>
-
-                    <div className="flex justify-between mt-4">
-                        <button onClick={handleBack} className="pare-button px-4 py-2 rounded bg-gray-300 text-primary-text">
-                            Назад
-                        </button>
-                        <button onClick={handleNext} className="pare-button px-4 py-2 rounded bg-secondary-color text-secondary-text">
-                            Далее
-                        </button>
-                    </div>
-                </div>
-            )}
-
-            {/* Step 6: Payment Details */}
-            {step === 6 && (
-                <div className="step" onKeyDown={handleOnKeyDown}>
-                    <h2 className="text-2xl mb-4 text-secondary-text reg">Регистрация продавца</h2>
-                    <button className="close-button" onClick={handleClose}>
-                        <SvgSelector id="cross" className="h-4 w-4" />
-                    </button>
-                    <h2 className="text-2xl mb-4 text-secondary-text">Платежные реквизиты</h2>
-
-                    <input
-                        type="text"
-                        name="paymentDetail.bankName"
-                        value={formData.sellerCreateRequest.paymentDetail.bankName}
-                        onChange={handleChange}
-                        placeholder="Название банка *"
-                        className="w-full p-2 mb-2 border rounded bg-primary-color text-primary-text"
-                    />
-                    {errors.paymentDetail?.bankName && <p className="text-error-color text-sm mb-2">{errors.paymentDetail.bankName}</p>}
-
-                    <input
-                        type="text"
-                        name="paymentDetail.bankAccountNumber"
-                        value={formData.sellerCreateRequest.paymentDetail.bankAccountNumber}
-                        onChange={handleChange}
-                        placeholder="Номер счета (20 цифр) *"
-                        maxLength={20}
-                        className="w-full p-2 mb-2 border rounded bg-primary-color text-primary-text"
-                    />
-                    {errors.paymentDetail?.bankAccountNumber && <p className="text-error-color text-sm mb-2">{errors.paymentDetail.bankAccountNumber}</p>}
-
-                    <input
-                        type="text"
-                        name="paymentDetail.bic"
-                        value={formData.sellerCreateRequest.paymentDetail.bic}
-                        onChange={handleChange}
-                        placeholder="БИК (9 цифр) *"
-                        maxLength={9}
-                        className="w-full p-2 mb-2 border rounded bg-primary-color text-primary-text"
-                    />
-                    {errors.paymentDetail?.bic && <p className="text-error-color text-sm mb-2">{errors.paymentDetail.bic}</p>}
-
-                    <input
-                        type="text"
-                        name="paymentDetail.accountHolderName"
-                        value={formData.sellerCreateRequest.paymentDetail.accountHolderName}
-                        onChange={handleChange}
-                        placeholder="Владелец счета *"
-                        className="w-full p-2 mb-2 border rounded bg-primary-color text-primary-text"
-                    />
-                    {errors.paymentDetail?.accountHolderName && <p className="text-error-color text-sm mb-2">{errors.paymentDetail.accountHolderName}</p>}
-
-                    <input
-                        type="text"
-                        name="paymentDetail.inn"
-                        value={formData.sellerCreateRequest.paymentDetail.inn}
-                        onChange={handleChange}
-                        placeholder="ИНН (10 цифр) *"
-                        maxLength={10}
-                        className="w-full p-2 mb-2 border rounded bg-primary-color text-primary-text"
-                    />
-                    {errors.paymentDetail?.inn && <p className="text-error-color text-sm mb-2">{errors.paymentDetail.inn}</p>}
 
                     <div className="flex justify-between mt-4">
                         <button onClick={handleBack} className="pare-button px-4 py-2 rounded bg-gray-300 text-primary-text">
@@ -626,4 +534,4 @@ const SellerSignUpForm: React.FC = () => {
     );
 };
 
-export default SellerSignUpForm;
+export default PickupPointSignUp;

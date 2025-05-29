@@ -1,12 +1,12 @@
 import React, {useState} from "react";
-import './HeaderSeller.style.scss';
+import './HeaderPickupPoint.style.scss';
 import type {JSX} from "react/jsx-dev-runtime";
 import {useLocation} from "react-router-dom";
 import SignInForm from "../../user/sign_in/SignIn.component.tsx";
 import SignUpForm from "../../user/sign_up/SignUpForm.component.tsx";
 
 
-const HeaderSeller: React.FC = () => {
+const HeaderPickupPoint: React.FC = () => {
 
     const [showSign, setShowSign] = useState(false);
     const [signForm, setSignForm] = useState<JSX.Element | null>(null);
@@ -32,18 +32,17 @@ const HeaderSeller: React.FC = () => {
     return (
         <div>
             {showSign && (signForm)}
-            <header className="header-seller">
+            <header className="header-pickup-point">
                 <div className="container grid grid-cols-5 gap-4 items-center py-4 mx-auto">
                     {/* Логотип */}
                     <div className="logo">
-                        <a href={"/seller/products"}  className="text-2xl font-bold">MARKET </a>
-                        <a href={"/seller/products"}  className="miniLogo text-2xl font-bold">продавец</a>
+                        <a href={"/pp/orders"}  className="text-2xl font-bold">MARKET </a>
+                        <a href={"/pp/orders"}  className="miniLogo text-2xl font-bold">пвз</a>
                     </div>
 
                     <div className="nav-links">
-                        <a href="/seller/profile" className={`nav-link ${isActive('/seller/profile') ? 'active' : ''}`}>Профиль</a>
-                        <a href="/seller/products" className={`nav-link ${isActive('/seller/products') ? 'active' : ''}`}>Мои товары</a>
-                        <a href="/seller/product/create" className={`nav-link ${isActive('/seller/product/create') ? 'active' : ''}`}>Добавить товар</a>
+                        <a href="/pp/profile" className={`nav-link ${isActive('/pp/profile') ? 'active' : ''}`}>Профиль</a>
+                        <a href="/pp/orders" className={`nav-link ${isActive('/pp/orders') ? 'active' : ''}`}>Заказы</a>
                     </div>
                 </div>
             </header>
@@ -51,4 +50,4 @@ const HeaderSeller: React.FC = () => {
     );
 }
 
-export default HeaderSeller;
+export default HeaderPickupPoint;
