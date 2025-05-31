@@ -3,7 +3,7 @@ export interface Address {
     region: string;
     city: string;
     street: string;
-    house: string;
+    houseNumber: string;
     postalCode: string;
 }
 

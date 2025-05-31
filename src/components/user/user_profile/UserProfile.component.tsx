@@ -1,13 +1,14 @@
 // components/user_profile/UserProfile.component.tsx
 import React, {useState, useRef, useEffect} from 'react';
-import {ArrowLeft, User, Mail, Lock, CreditCard, Plus, Trash2, Star, Eye, EyeOff, Package} from 'lucide-react';
+import {User as UserIcon, Mail, Lock, CreditCard, Plus, Trash2, Star, Eye, EyeOff, Package, LogOut} from 'lucide-react';
 
 import './UserProfile.style.scss';
 import {useUser} from '../../../context/UserContext';
 import type {
     EmailUpdateErrors,
-    PasswordUpdateErrors,
+    PasswordUpdateErrors, PaymentCard,
     PaymentCardErrors,
+    User,
     UserProfileErrors
 } from '../../../models/User.model';
 import {
@@ -18,21 +19,39 @@ import {
     type OrderFilters,
     OrderItemStatus
 } from "../../../models/Order.model.ts";
+import {logout} from "../../../api/AuthApi.ts";
+import {getAllCards, getUserData, updateUserProfile} from "../../../api/UserApi.ts";
+import {useNavigate} from "react-router-dom";
 
-type ProfileSection = 'orders' |'overview' | 'personal' | 'email' | 'password' | 'cards' | 'delete';
+type ProfileSection = 'orders' | 'overview' | 'personal' | 'email' | 'password' | 'cards' | 'delete' | 'logout';
 
 const UserProfile: React.FC = () => {
+    const navigate = useNavigate();
+    const [user, setUser] = useState<User | null>(null);
+    const [paymentCards, setPaymentCards] = useState<PaymentCard[]>([]);
+
+    // State to manage user profile sections and forms
     const {
-        state,
-        updateUserProfile,
         updateUserEmail,
         updateUserPassword,
-        sendEmailVerificationCode,
-        sendPasswordResetCode,
         addPaymentCard,
         deletePaymentCard,
         setDefaultCard
     } = useUser();
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                const res = await getUserData();
+                console.log(res.data);
+                setUser(res.data);
+            } catch (e) {
+                console.log(e);
+            }
+        }
+        fetchUser();
+    }, []);
+
 
     const [activeSection, setActiveSection] = useState<ProfileSection>('overview');
     const [errors, setErrors] = useState<{
@@ -44,10 +63,10 @@ const UserProfile: React.FC = () => {
 
     // Personal info form state
     const [personalForm, setPersonalForm] = useState({
-        surname: state.user?.userProfile.surname || '',
-        name: state.user?.userProfile.name || '',
-        patronymic: state.user?.userProfile.patronymic || '',
-        phoneNumber: state.user?.userProfile.phoneNumber || '',
+        surname: user?.userProfile.surname || '',
+        name: user?.userProfile.name || '',
+        patronymic: user?.userProfile.patronymic || '',
+        phoneNumber: user?.userProfile.phoneNumber || '',
     });
 
     // Email update form state
@@ -109,15 +128,15 @@ const UserProfile: React.FC = () => {
         });
 
     useEffect(() => {
-        if (state.user) {
+        if (user) {
             setPersonalForm({
-                surname: state.user.userProfile.surname,
-                name: state.user.userProfile.name,
-                patronymic: state.user.userProfile.patronymic,
-                phoneNumber: state.user.userProfile.phoneNumber,
+                surname: user.userProfile.surname,
+                name: user.userProfile.name,
+                patronymic: user.userProfile.patronymic,
+                phoneNumber: user.userProfile.phoneNumber,
             });
         }
-    }, [state.user]);
+    }, [user]);
 
     // Validation functions
     const validatePersonalInfo = () => {
@@ -199,11 +218,14 @@ const UserProfile: React.FC = () => {
     const handlePersonalInfoSubmit = async () => {
         if (!validatePersonalInfo()) return;
 
+        const data = Object.fromEntries(
+            Object.entries(personalForm).filter(([key, value]) => value !== (user?.userProfile as any)?.[key])
+        );
         try {
-            await updateUserProfile(personalForm);
-            alert('Личные данные успешно обновлены');
+            await updateUserProfile(data);
+            window.location.reload();
         } catch (error) {
-            console.error('Ошибка обновления профиля:', error);
+            setErrors(prev => ({...prev, profile: {response: 'Ошибка обновления профиля'}}));
         }
     };
 
@@ -331,6 +353,11 @@ const UserProfile: React.FC = () => {
         }
     };
 
+    const handleCardSection = async () => {
+        const res = await getAllCards();
+        setPaymentCards(res.data);
+    }
+
     const handleDeleteProfile = async () => {
         if (deleteConfirmation !== 'УДАЛИТЬ') {
             alert('Введите "УДАЛИТЬ" для подтверждения');
@@ -343,9 +370,17 @@ const UserProfile: React.FC = () => {
             setActiveSection('overview');
         } catch (error) {
             console.error('Ошибка удаления профиля:', error);
-        } finally {
         }
     };
+
+    const handleLogout = async () => {
+        try {
+            await logout();
+            window.location.href = '/';
+        } catch (error) {
+            window.location.href = '/';
+        }
+    }
 
     return (
         <div className="user-profile">
@@ -354,11 +389,11 @@ const UserProfile: React.FC = () => {
                 <div className="profile-sidebar">
                     <div className="profile-header">
                         <div className="profile-avatar">
-                            <User size={40}/>
+                            <UserIcon size={40}/>
                         </div>
                         <div className="profile-info">
-                            <h2>{state.user.userProfile.name} {state.user.userProfile.surname}</h2>
-                            <p>{state.user.email}</p>
+                            <h2>{user?.userProfile.name} {user?.userProfile.surname}</h2>
+                            <p>{user?.email}</p>
                         </div>
                     </div>
 
@@ -367,21 +402,21 @@ const UserProfile: React.FC = () => {
                             className={`nav-item ${activeSection === 'overview' ? 'active' : ''}`}
                             onClick={() => setActiveSection('overview')}
                         >
-                            <User size={20}/>
+                            <UserIcon size={20}/>
                             <span>Профиль</span>
                         </button>
                         <button
                             className={`nav-item ${activeSection === 'orders' ? 'active' : ''}`}
                             onClick={() => setActiveSection('orders')}
                         >
-                            <Package size={20} />
+                            <Package size={20}/>
                             <span>Заказы</span>
                         </button>
                         <button
                             className={`nav-item ${activeSection === 'personal' ? 'active' : ''}`}
                             onClick={() => setActiveSection('personal')}
                         >
-                            <User size={20}/>
+                            <UserIcon size={20}/>
                             <span>Личные данные</span>
                         </button>
                         <button
@@ -400,10 +435,24 @@ const UserProfile: React.FC = () => {
                         </button>
                         <button
                             className={`nav-item ${activeSection === 'cards' ? 'active' : ''}`}
-                            onClick={() => setActiveSection('cards')}
+                            onClick={
+                                async () => {
+                                    await handleCardSection();
+                                    setActiveSection('cards')
+                                }
+                            }
                         >
                             <CreditCard size={20}/>
                             <span>Способы оплаты</span>
+                        </button>
+                        <button
+                            onClick={handleLogout}
+                            className={`nav-item w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                                activeSection === 'logout' ? 'active' : ''
+                            }`}
+                        >
+                            <LogOut size={20}/>
+                            <span>Выйти из аккаунта</span>
                         </button>
                         <button
                             onClick={() => setActiveSection('delete')}
@@ -424,28 +473,28 @@ const UserProfile: React.FC = () => {
                             <div className="overview-cards">
                                 <div className="info-card">
                                     <h4>Личная информация</h4>
-                                    <p><strong>Имя:</strong> {state.user.userProfile.name}</p>
-                                    <p><strong>Фамилия:</strong> {state.user.userProfile.surname}</p>
+                                    <p><strong>Имя:</strong> {user?.userProfile.name}</p>
+                                    <p><strong>Фамилия:</strong> {user?.userProfile.surname}</p>
                                     <p>
-                                        <strong>Отчество:</strong> {state.user.userProfile.patronymic || 'Не указано'}
+                                        <strong>Отчество:</strong> {user?.userProfile.patronymic || 'Не указано'}
                                     </p>
                                 </div>
                                 <div className="info-card">
                                     <h4>Контактная информация</h4>
                                     <p>
-                                        <strong>Телефон:</strong> {state.user.userProfile.phoneNumber || 'Не указан'}
+                                        <strong>Телефон:</strong> {user?.userProfile.phoneNumber || 'Не указан'}
                                     </p>
-                                    <p><strong>Email:</strong> {state.user.email}</p>
+                                    <p><strong>Email:</strong> {user?.email}</p>
                                 </div>
-                                <div className="info-card">
-                                    <h4>Способы оплаты</h4>
-                                    <p><strong>Добавлено карт:</strong> {state.paymentCards.length}</p>
-                                    {state.paymentCards.length > 0 && (
-                                        <p><strong>Основная
-                                            карта:</strong> **** {state.paymentCards.find(c => c.isDefault)?.lastFourDigits || 'Не выбрана'}
-                                        </p>
-                                    )}
-                                </div>
+                                {/*<div className="info-card">*/}
+                                {/*    <h4>Способы оплаты</h4>*/}
+                                {/*    <p><strong>Добавлено карт:</strong> {state.paymentCards.length}</p>*/}
+                                {/*    {state.paymentCards.length > 0 && (*/}
+                                {/*        <p><strong>Основная*/}
+                                {/*            карта:</strong> **** {state.paymentCards.find(c => c.isDefault)?.lastFourDigits || 'Не выбрана'}*/}
+                                {/*        </p>*/}
+                                {/*    )}*/}
+                                {/*</div>*/}
                             </div>
                         </div>
                     )}
@@ -510,7 +559,7 @@ const UserProfile: React.FC = () => {
                                             type="date"
                                             value={filters.dateFrom || ''}
                                             onChange={e =>
-                                                setFilters(prev => ({ ...prev, dateFrom: e.target.value }))
+                                                setFilters(prev => ({...prev, dateFrom: e.target.value}))
                                             }
                                         />
                                         <label>По дату:</label>
@@ -518,7 +567,7 @@ const UserProfile: React.FC = () => {
                                             type="date"
                                             value={filters.dateTo || ''}
                                             onChange={e =>
-                                                setFilters(prev => ({ ...prev, dateTo: e.target.value }))
+                                                setFilters(prev => ({...prev, dateTo: e.target.value}))
                                             }
                                         />
 
@@ -528,7 +577,7 @@ const UserProfile: React.FC = () => {
                                             placeholder="Поиск по адресу"
                                             value={filters.searchQuery || ''}
                                             onChange={e =>
-                                                setFilters(prev => ({ ...prev, searchQuery: e.target.value }))
+                                                setFilters(prev => ({...prev, searchQuery: e.target.value}))
                                             }
                                         />
                                     </div>
@@ -606,6 +655,8 @@ const UserProfile: React.FC = () => {
                                     />
                                     {errors.profile?.phoneNumber &&
                                         <span className="error-text">{errors.profile.phoneNumber}</span>}
+                                    {errors.profile?.response &&
+                                        <span className="error-text">{errors.profile.response}</span>}
                                 </div>
                                 <button type="button" onClick={handlePersonalInfoSubmit}
                                         className="submit-button">
@@ -622,7 +673,7 @@ const UserProfile: React.FC = () => {
                                 <form className="email-form">
                                     <div className="form-group">
                                         <label>Текущий email</label>
-                                        <input type="email" value={state.user.email} disabled/>
+                                        <input type="email" value={user?.email} disabled/>
                                     </div>
                                     <div className="form-group">
                                         <label>Новый email *</label>
@@ -644,7 +695,7 @@ const UserProfile: React.FC = () => {
                                 </form>
                             ) : (
                                 <div className="verification-form">
-                                    <p>Код подтверждения отправлен на {state.user.email}</p>
+                                    <p>Код подтверждения отправлен на {user?.email}</p>
                                     <div className="code-inputs">
                                         {emailCodeInputs.map((value, index) => (
                                             <input
@@ -870,13 +921,13 @@ const UserProfile: React.FC = () => {
                             )}
 
                             <div className="cards-list">
-                                {state.paymentCards.length === 0 ? (
+                                {paymentCards.length === 0 ? (
                                     <div className="no-cards">
                                         <CreditCard size={48}/>
                                         <p>У вас пока нет добавленных карт</p>
                                     </div>
                                 ) : (
-                                    state.paymentCards.map(card => (
+                                    paymentCards.map(card => (
                                         <div key={card.id}
                                              className={`payment-card ${card.isDefault ? 'default' : ''}`}>
                                             <div className="card-info">
@@ -937,7 +988,8 @@ const UserProfile: React.FC = () => {
                                 <div className="space-y-6">
                                     <div className="form-group">
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Для подтверждения удаления введите слово <strong className="text-red-600">"УДАЛИТЬ"</strong> в поле ниже:
+                                            Для подтверждения удаления введите слово <strong
+                                            className="text-red-600">"УДАЛИТЬ"</strong> в поле ниже:
                                         </label>
                                         <input
                                             type="text"

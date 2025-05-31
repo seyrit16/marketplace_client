@@ -1,19 +1,8 @@
 import React, {useState, useRef, useEffect} from 'react';
 import SvgSelector from '../../SvgSelector.component.tsx';
 import './SignUpForm.style.scss';
-
-interface UserProfile {
-    surname: string;
-    name: string;
-    patronymic: string;
-}
-
-interface SignUpData {
-    email: string;
-    verifyCode: string;
-    password: string;
-    userProfile: UserProfile;
-}
+import type {SignUpData} from "../../../models/User.model.ts";
+import {sendCode, signUpUser} from "../../../api/AuthApi.ts";
 
 interface SignUpFormProps {
     onClose: () => void;
@@ -47,9 +36,24 @@ const SignUpForm: React.FC<SignUpFormProps> = ({onClose, openSignIn}) => {
         }
     }, [step]);
 
+    const [errors, setErrors] = useState<SignUpErrors>({});
+    const [codeInputs, setCodeInputs] = useState<string[]>(Array(6).fill(''));
+    const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+    const [showPassword, setShowPassword] = useState(false);
+
+    const emptyFormData: SignUpData = {
+        email: '',
+        code: '',
+        password: '',
+        userProfile: {
+            surname: '',
+            name: '',
+            patronymic: '',
+        },
+    };
     const [formData, setFormData] = useState<SignUpData>({
         email: '',
-        verifyCode: '',
+        code: '',
         password: '',
         userProfile: {
             surname: '',
@@ -58,18 +62,12 @@ const SignUpForm: React.FC<SignUpFormProps> = ({onClose, openSignIn}) => {
         },
     });
 
-    const [errors, setErrors] = useState<SignUpErrors>({});
-    const [codeInputs, setCodeInputs] = useState<string[]>(Array(6).fill('')); // Для 6 полей кода
-    const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-    const [showPassword, setShowPassword] = useState(false);
-
-    // Email validation
     const validateEmail = (email: string) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(email) ? '' : 'Электронная почта должна быть валидной';
     };
 
-    // Password validation
+
     const validatePassword = (password: string) => {
         const passwordRegex = /^(?=.*[A-Za-zА-Яа-яЁё])(?=.*\d)[A-Za-zА-Яа-яЁё\d]{8,}$/;
         return passwordRegex.test(password)
@@ -77,7 +75,6 @@ const SignUpForm: React.FC<SignUpFormProps> = ({onClose, openSignIn}) => {
             : 'Пароль должен содержать минимум 8 символов, включая буквы (латиница или кириллица) и цифры';
     };
 
-    // Name and Surname validation
     const validateName = (name: string) => {
         return name.trim() ? '' : 'Имя не должно быть пустым';
     };
@@ -86,14 +83,13 @@ const SignUpForm: React.FC<SignUpFormProps> = ({onClose, openSignIn}) => {
         return surname.trim() ? '' : 'Фамилия не должна быть пустой';
     };
 
-    // Code validation
     const validateCode = (code: string) => {
+        console.log(code);
         return code.length === 6 && code.split('').every(char => char !== '')
             ? ''
             : 'Все поля кода должны быть заполнены';
     };
 
-    // Handle input changes for regular fields
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const {name, value} = e.target;
         if (name in formData.userProfile) {
@@ -106,29 +102,25 @@ const SignUpForm: React.FC<SignUpFormProps> = ({onClose, openSignIn}) => {
         }
     };
 
-    // Handle code input changes
     const handleCodeChange = (index: number, value: string) => {
-        if (/^[0-9]?$/.test(value)) { // Только цифры, максимум 1 символ
+        if (/^[0-9]?$/.test(value)) {
             const newCodeInputs = [...codeInputs];
             newCodeInputs[index] = value;
             setCodeInputs(newCodeInputs);
-            setFormData({...formData, verifyCode: newCodeInputs.join('')});
+            setFormData({...formData, code: newCodeInputs.join('')});
 
-            // Автофокус на следующее поле
             if (value && index < 5) {
                 inputRefs.current[index + 1]?.focus();
             }
         }
     };
 
-    // Handle key down for backspace and navigation
     const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Backspace' && !codeInputs[index] && index > 0) {
             inputRefs.current[index - 1]?.focus();
         }
     };
 
-    // Handle paste
     const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
         const pastedData = e.clipboardData.getData('text').slice(0, 6);
         if (/^\d{1,6}$/.test(pastedData)) {
@@ -137,23 +129,32 @@ const SignUpForm: React.FC<SignUpFormProps> = ({onClose, openSignIn}) => {
                 newCodeInputs[i] = char;
             });
             setCodeInputs(newCodeInputs);
-            setFormData({...formData, verifyCode: newCodeInputs.join('')});
+            setFormData({...formData, code: newCodeInputs.join('')});
             inputRefs.current[pastedData.length - 1]?.focus();
         }
         e.preventDefault();
     };
 
-    // Handle step submission
-    const handleNext = () => {
+    const handleNext = async () => {
         const stepErrors: SignUpErrors = {};
 
         if (step === 1) {
             if (!formData.email) stepErrors.email = 'Электронная почта не должна быть пустой';
             else stepErrors.email = validateEmail(formData.email);
             if (!stepErrors.email) {
-                setStep(2);
+                try{
+                    await sendCode(formData.email);
+                }catch(e:any){
+                    stepErrors.email = 'Ошибка при отправке кода';
+                    return;
+                }
+                finally {
+                    setStep(2);
+                }
+
             }
         } else if (step === 2) {
+            formData.verifyCode = codeInputs.join('');
             stepErrors.verifyCode = validateCode(formData.verifyCode);
             if (!stepErrors.verifyCode) {
                 setStep(3);
@@ -175,25 +176,43 @@ const SignUpForm: React.FC<SignUpFormProps> = ({onClose, openSignIn}) => {
                 surname: validateSurname(formData.userProfile.surname)
             };
             if (!stepErrors.password && !stepErrors.userProfile?.name && !stepErrors.userProfile?.surname) {
-                console.log('Form submitted:', formData);
-                alert('Регистрация успешна!');
-                window.location.href = '/';
+                try{
+                    await signUpUser(formData);
+                    openSignIn();
+                }catch(e:any){
+                    if(e.response?.status === 401) {
+                        stepErrors.email = e.response.data.message;
+                        setFormData(emptyFormData);
+                        setCodeInputs(Array(6).fill(''));
+                        setStep(1);
+                    }
+                    else if(e.response?.status === 409) {
+                        stepErrors.email = e.response.data.message;
+                        setFormData(emptyFormData);
+                        setCodeInputs(Array(6).fill(''));
+                        setStep(1);
+                    }
+                    else {
+                        stepErrors.email = 'Ошибка при создании аккаунта, попробуйте попытку позже!';
+                        setFormData(emptyFormData);
+                        setCodeInputs(Array(6).fill(''));
+                        setStep(1);
+                    }
+                }
             }
         }
 
         setErrors(stepErrors);
     };
 
-    // Handle back navigation
     const handleBack = () => {
         setStep(step - 1);
     };
 
-    // Handle close button
     const handleClose = () => {
         setFormData({
             email: '',
-            verifyCode: '',
+            code: '',
             password: '',
             userProfile: {
                 surname: '',
@@ -209,7 +228,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({onClose, openSignIn}) => {
 
     const handleOnKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault(); // чтобы избежать случайного сабмита формы
+            e.preventDefault();
             handleNext();
         }
     }
@@ -237,7 +256,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({onClose, openSignIn}) => {
                     </p>
                     <button onClick={handleNext}
                             className="mt-4 px-4 py-2 rounded bg-secondary-color text-secondary-text">
-                        Далее
+                        Отправить код
                     </button>
                     <a onClick={openSignIn}>Уже есть аккаунт?</a>
                 </div>

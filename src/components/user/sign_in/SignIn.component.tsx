@@ -1,6 +1,7 @@
 import SvgSelector from "../../SvgSelector.component.tsx";
 import React, {useEffect, useRef, useState} from "react";
 import './SignIn.style.scss'
+import {sendCode, signInWithCode, signInWithPassword} from "../../../api/AuthApi.ts";
 
 
 interface SignInFormProps {
@@ -8,10 +9,11 @@ interface SignInFormProps {
     openSignUp: () => void;
 }
 
-interface SignUpErrors {
+interface SignInErrors {
     email?: string;
-    verifyCode?: string;
+    code?: string;
     password?: string;
+    response?: string;
 }
 
 const validateEmail = (email: string) => {
@@ -45,18 +47,22 @@ const SignInForm: React.FC<SignInFormProps> = ({onClose, openSignUp}) => {
     }, [step, authMode]);
 
 
+    const emptyFormData = {
+        email: "",
+        code: "",
+        password: "",
+    }
     const [formData, setFormData] = useState({
         email: "",
-        verifyCode: "",
+        code: "",
         password: "",
     });
 
-    const [errors, setErrors] = useState<SignUpErrors>({});
+    const [errors, setErrors] = useState<SignInErrors>({});
     const [codeInputs, setCodeInputs] = useState<string[]>(Array(6).fill('')); // Для 6 полей кода
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
     const [showPassword, setShowPassword] = useState(false);
 
-    // Handle input changes for regular fields
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData((prev) => ({...prev, [e.target.name]: e.target.value}));
     };
@@ -64,7 +70,7 @@ const SignInForm: React.FC<SignInFormProps> = ({onClose, openSignUp}) => {
     const handleModeSwitch = (mode: "code" | "password") => {
         setAuthMode(mode);
         setStep(1);
-        setFormData({email: "", verifyCode: "", password: ""});
+        setFormData({email: "", code: "", password: ""});
         setErrors({});
     };
 
@@ -74,7 +80,7 @@ const SignInForm: React.FC<SignInFormProps> = ({onClose, openSignUp}) => {
             const newCodeInputs = [...codeInputs];
             newCodeInputs[index] = value;
             setCodeInputs(newCodeInputs);
-            setFormData({...formData, verifyCode: newCodeInputs.join('')});
+            setFormData({...formData, code: newCodeInputs.join('')});
 
             // Автофокус на следующее поле
             if (value && index < 5) {
@@ -99,15 +105,15 @@ const SignInForm: React.FC<SignInFormProps> = ({onClose, openSignUp}) => {
                 newCodeInputs[i] = char;
             });
             setCodeInputs(newCodeInputs);
-            setFormData({...formData, verifyCode: newCodeInputs.join('')});
+            setFormData({...formData, code: newCodeInputs.join('')});
             inputRefs.current[pastedData.length - 1]?.focus();
         }
         e.preventDefault();
     };
 
     // Handle step submission
-    const handleNext = () => {
-        const stepErrors: SignUpErrors = {};
+    const handleNext = async () => {
+        const stepErrors: SignInErrors = {};
 
         if (authMode === "code") {
             if (step === 1) {
@@ -119,19 +125,39 @@ const SignInForm: React.FC<SignInFormProps> = ({onClose, openSignUp}) => {
                 }
 
                 if (!stepErrors.email) {
+                    try{
+                        await sendCode(formData.email);
+                    }catch(e:any){
+                        stepErrors.response = 'Ошибка при отправке кода';
+                        return;
+                    }
+
                     setStep(2);
                 }
 
             } else if (step === 2) {
-                const codeError = validateCode(formData.verifyCode);
+                const codeError = validateCode(formData.code);
                 if (codeError) {
-                    stepErrors.verifyCode = codeError;
+                    stepErrors.code = codeError;
                 }
 
-                if (!stepErrors.verifyCode) {
-                    // Здесь можно делать реальный вход по коду
-                    alert("Успешный вход по коду");
-                    onClose();
+                if (!stepErrors.code) {
+                    try{
+                        await signInWithCode('u', formData);
+                        onClose();
+                    }catch(e:any){
+                        if (e.response?.status === 401 || e.response?.status === 404) {
+                            stepErrors.response = e.response.data.message;
+                            setFormData(emptyFormData);
+                            setCodeInputs(Array(6).fill(''));
+                            setStep(1);
+                        }else {
+                            stepErrors.email = 'Ошибка при входе в аккаунт, попробуйте попытку позже!';
+                            setFormData(emptyFormData);
+                            setCodeInputs(Array(6).fill(''));
+                            setStep(1);
+                        }
+                    }
                 }
             }
 
@@ -151,9 +177,22 @@ const SignInForm: React.FC<SignInFormProps> = ({onClose, openSignUp}) => {
             }
 
             if (!stepErrors.email && !stepErrors.password) {
-                // Здесь можно делать реальный вход по паролю
-                alert("Успешный вход по паролю");
-                onClose();
+                try{
+                    await signInWithPassword('u', formData);
+                    onClose();
+                }catch(e:any){
+                    if (e.response?.status === 401 || e.response?.status === 404) {
+                        stepErrors.response = e.response.data.message;
+                        setFormData(emptyFormData);
+                        setCodeInputs(Array(6).fill(''));
+                        setStep(1);
+                    }else {
+                        stepErrors.email = 'Ошибка при входе в аккаунт, попробуйте попытку позже!';
+                        setFormData(emptyFormData);
+                        setCodeInputs(Array(6).fill(''));
+                        setStep(1);
+                    }
+                }
             }
         }
 
@@ -169,7 +208,7 @@ const SignInForm: React.FC<SignInFormProps> = ({onClose, openSignUp}) => {
     const handleClose = () => {
         setFormData({
             email: '',
-            verifyCode: '',
+            code: '',
             password: ''
         });
         setCodeInputs(Array(6).fill(''));
@@ -204,7 +243,10 @@ const SignInForm: React.FC<SignInFormProps> = ({onClose, openSignUp}) => {
                         className="w-full p-2 mb-2 border rounded bg-primary-color text-primary-text"
                     />
                     <p className={`text-sm h-5 ${errors.email ? 'text-error-color' : 'text-invisible-color'}`}>
-                        {errors.email || 'Э'}
+                        {errors.email}
+                    </p>
+                    <p className={`text-sm h-5 ${errors.response ? 'text-error-color' : 'text-invisible-color'}`}>
+                        {errors.response}
                     </p>
                     <div className="flex justify-between mt-4">
                         <button
@@ -249,8 +291,8 @@ const SignInForm: React.FC<SignInFormProps> = ({onClose, openSignUp}) => {
                             />
                         ))}
                     </div>
-                    <p className={`text-sm h-5 ${errors.verifyCode ? 'text-error-color' : 'text-invisible-color'}`}>
-                        {errors.verifyCode || 'В'}
+                    <p className={`text-sm h-5 ${errors.code ? 'text-error-color' : 'text-invisible-color'}`}>
+                        {errors.code || 'В'}
                     </p>
                     <div className="flex justify-between mt-4">
                         <button
@@ -306,6 +348,8 @@ const SignInForm: React.FC<SignInFormProps> = ({onClose, openSignUp}) => {
                         </button>
                     </div>
                     {errors.password && <p className="text-error-color text-sm">{errors.password}</p>}
+                    {errors.response && <p className="text-error-color text-sm">{errors.response}</p>}
+
                     <div className="flex justify-between mt-4">
                         <button
                             className={"pare-button px-4 py-2 rounded bg-gray-300 text-primary-text"}

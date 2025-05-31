@@ -1,7 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import SvgSelector from '../../SvgSelector.component.tsx';
 import './SignUpSeller.style.scss';
 import {useNavigate} from "react-router-dom";
+import {sendCode, signUpSeller} from "../../../api/AuthApi.ts";
 
 interface PersonDetail {
     surname: string;
@@ -73,7 +74,7 @@ const SellerSignUpForm: React.FC = () => {
         }
     }, [step]);
 
-    const [formData, setFormData] = useState<SellerSignUpData>({
+    const emptyFormData = {
         email: '',
         password: '',
         code: '',
@@ -95,7 +96,8 @@ const SellerSignUpForm: React.FC = () => {
                 inn: '',
             },
         },
-    });
+    }
+    const [formData, setFormData] = useState<SellerSignUpData>(emptyFormData);
 
     const [errors, setErrors] = useState<SellerSignUpErrors>({});
     const [codeInputs, setCodeInputs] = useState<string[]>(Array(6).fill(''));
@@ -142,7 +144,7 @@ const SellerSignUpForm: React.FC = () => {
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
+        const {name, value} = e.target;
 
         if (name.includes('.')) {
             const [parent, child] = name.split('.');
@@ -157,7 +159,7 @@ const SellerSignUpForm: React.FC = () => {
                 },
             }));
         } else if (name === 'email' || name === 'password') {
-            setFormData(prev => ({ ...prev, [name]: value }));
+            setFormData(prev => ({...prev, [name]: value}));
         } else {
             setFormData(prev => ({
                 ...prev,
@@ -174,7 +176,7 @@ const SellerSignUpForm: React.FC = () => {
             const newCodeInputs = [...codeInputs];
             newCodeInputs[index] = value;
             setCodeInputs(newCodeInputs);
-            setFormData(prev => ({ ...prev, code: newCodeInputs.join('') }));
+            setFormData(prev => ({...prev, code: newCodeInputs.join('')}));
 
             if (value && index < 5) {
                 inputRefs.current[index + 1]?.focus();
@@ -196,7 +198,7 @@ const SellerSignUpForm: React.FC = () => {
                 newCodeInputs[i] = char;
             });
             setCodeInputs(newCodeInputs);
-            setFormData(prev => ({ ...prev, code: newCodeInputs.join('') }));
+            setFormData(prev => ({...prev, code: newCodeInputs.join('')}));
             inputRefs.current[pastedData.length - 1]?.focus();
         }
         e.preventDefault();
@@ -236,15 +238,16 @@ const SellerSignUpForm: React.FC = () => {
                 stepErrors.shortCompanyName = validateRequired(formData.sellerCreateRequest.shortCompanyName, 'Краткое название компании');
                 break;
 
-            case 6:
-                { stepErrors.paymentDetail = {};
+            case 6: {
+                stepErrors.paymentDetail = {};
                 const pd = formData.sellerCreateRequest.paymentDetail;
                 stepErrors.paymentDetail.bankName = validateRequired(pd.bankName, 'Название банка');
                 stepErrors.paymentDetail.bankAccountNumber = validateBankAccount(pd.bankAccountNumber);
                 stepErrors.paymentDetail.bic = validateBIC(pd.bic);
                 stepErrors.paymentDetail.accountHolderName = validateRequired(pd.accountHolderName, 'Владелец счета');
                 stepErrors.paymentDetail.inn = validateINN(pd.inn);
-                break; }
+                break;
+            }
         }
 
         return stepErrors;
@@ -260,17 +263,43 @@ const SellerSignUpForm: React.FC = () => {
         });
     };
 
-    const handleNext = () => {
+    const handleNext = async () => {
         const stepErrors = validateStep(step);
         setErrors(stepErrors);
 
         if (!hasStepErrors(stepErrors)) {
             if (step < 6) {
+                if (step == 1) {
+                    try {
+                        await sendCode(formData.email);
+                    } catch (e: any) {
+                        stepErrors.email = 'Ошибка при отправке кода';
+                        return;
+                    }
+                }
                 setStep(step + 1);
             } else {
-                console.log('Seller registration data:', formData);
-                alert('Регистрация продавца успешна!');
-                navigate("/seller/sign_in")
+                try {
+                    await signUpSeller(formData);
+                    navigate("/seller/sign_in");
+                } catch (e: any) {
+                    if (e.response?.status === 401) {
+                        stepErrors.email = e.response.data.message;
+                        setFormData(emptyFormData);
+                        setCodeInputs(Array(6).fill(''));
+                        setStep(1);
+                    } else if (e.response?.status === 409) {
+                        stepErrors.email = e.response.data.message;
+                        setFormData(emptyFormData);
+                        setCodeInputs(Array(6).fill(''));
+                        setStep(1);
+                    } else {
+                        stepErrors.email = 'Ошибка при создании аккаунта, попробуйте попытку позже!';
+                        setFormData(emptyFormData);
+                        setCodeInputs(Array(6).fill(''));
+                        setStep(1);
+                    }
+                }
             }
         }
     };
@@ -321,9 +350,6 @@ const SellerSignUpForm: React.FC = () => {
             {step === 1 && (
                 <div className="step seller-form">
                     <h2 className="text-2xl mb-4 text-secondary-text reg">Регистрация продавца</h2>
-                    {/*<button className="close-button" onClick={handleClose}>*/}
-                    {/*    <SvgSelector id="cross" className="h-4 w-4" />*/}
-                    {/*</button>*/}
                     <h2 className="text-2xl mb-4 text-secondary-text">Введите электронную почту</h2>
                     <div className="field-group">
                         <input
@@ -337,10 +363,13 @@ const SellerSignUpForm: React.FC = () => {
                         />
                         {errors.email && <p className="text-error-color">{errors.email}</p>}
                     </div>
-                    <button onClick={handleNext} className="mt-4 px-4 py-2 rounded bg-secondary-color text-secondary-text">
+                    <button onClick={handleNext}
+                            className="mt-4 px-4 py-2 rounded bg-secondary-color text-secondary-text">
                         Далее
                     </button>
-                    <a role={"button"} onClick={()=>{navigate("/seller/sign_in")}}>Уже есть аккаунт?</a>
+                    <a role={"button"} onClick={() => {
+                        navigate("/seller/sign_in")
+                    }}>Уже есть аккаунт?</a>
                 </div>
             )}
 
@@ -349,7 +378,7 @@ const SellerSignUpForm: React.FC = () => {
                 <div className="step seller-form">
                     <h2 className="text-2xl mb-4 text-secondary-text reg">Регистрация продавца</h2>
                     <button className="close-button" onClick={handleClose}>
-                        <SvgSelector id="cross" className="h-4 w-4" />
+                        <SvgSelector id="cross" className="h-4 w-4"/>
                     </button>
                     <h2 className="text-2xl mb-4 text-secondary-text">Введите код подтверждения</h2>
                     <div className="field-group">
@@ -374,10 +403,12 @@ const SellerSignUpForm: React.FC = () => {
                         {errors.code && <p className="text-error-color">{errors.code}</p>}
                     </div>
                     <div className="flex justify-between mt-4">
-                        <button onClick={handleBack} className="pare-button px-4 py-2 rounded bg-gray-300 text-primary-text">
+                        <button onClick={handleBack}
+                                className="pare-button px-4 py-2 rounded bg-gray-300 text-primary-text">
                             Назад
                         </button>
-                        <button onClick={handleNext} className="pare-button px-4 py-2 rounded bg-secondary-color text-secondary-text">
+                        <button onClick={handleNext}
+                                className="pare-button px-4 py-2 rounded bg-secondary-color text-secondary-text">
                             Далее
                         </button>
                     </div>
@@ -389,7 +420,7 @@ const SellerSignUpForm: React.FC = () => {
                 <div className="step seller-form">
                     <h2 className="text-2xl mb-4 text-secondary-text reg">Регистрация продавца</h2>
                     <button className="close-button" onClick={handleClose}>
-                        <SvgSelector id="cross" className="h-4 w-4" />
+                        <SvgSelector id="cross" className="h-4 w-4"/>
                     </button>
                     <h2 className="text-2xl mb-4 text-secondary-text">Создайте пароль</h2>
                     <div className="field-group">
@@ -408,17 +439,19 @@ const SellerSignUpForm: React.FC = () => {
                                 onClick={() => setShowPassword(!showPassword)}
                                 className="eye-btn"
                             >
-                                <SvgSelector id={showPassword ? 'eye-off' : 'eye'} className="w-6 h-6" />
+                                <SvgSelector id={showPassword ? 'eye-off' : 'eye'} className="w-6 h-6"/>
                             </button>
                         </div>
                         {errors.password && <p className="text-error-color">{errors.password}</p>}
                         <div className="field-hint">Минимум 8 символов, включая буквы и цифры</div>
                     </div>
                     <div className="flex justify-between mt-4">
-                        <button onClick={handleBack} className="pare-button px-4 py-2 rounded bg-gray-300 text-primary-text">
+                        <button onClick={handleBack}
+                                className="pare-button px-4 py-2 rounded bg-gray-300 text-primary-text">
                             Назад
                         </button>
-                        <button onClick={handleNext} className="pare-button px-4 py-2 rounded bg-secondary-color text-secondary-text">
+                        <button onClick={handleNext}
+                                className="pare-button px-4 py-2 rounded bg-secondary-color text-secondary-text">
                             Далее
                         </button>
                     </div>
@@ -430,7 +463,7 @@ const SellerSignUpForm: React.FC = () => {
                 <div className="step seller-form">
                     <h2 className="text-2xl mb-4 text-secondary-text reg">Регистрация продавца</h2>
                     <button className="close-button" onClick={handleClose}>
-                        <SvgSelector id="cross" className="h-4 w-4" />
+                        <SvgSelector id="cross" className="h-4 w-4"/>
                     </button>
                     <h2 className="text-2xl mb-4 text-secondary-text">Личная информация</h2>
 
@@ -483,10 +516,12 @@ const SellerSignUpForm: React.FC = () => {
                     </div>
 
                     <div className="flex justify-between mt-4">
-                        <button onClick={handleBack} className="pare-button px-4 py-2 rounded bg-gray-300 text-primary-text">
+                        <button onClick={handleBack}
+                                className="pare-button px-4 py-2 rounded bg-gray-300 text-primary-text">
                             Назад
                         </button>
-                        <button onClick={handleNext} className="pare-button px-4 py-2 rounded bg-secondary-color text-secondary-text">
+                        <button onClick={handleNext}
+                                className="pare-button px-4 py-2 rounded bg-secondary-color text-secondary-text">
                             Далее
                         </button>
                     </div>
@@ -498,7 +533,7 @@ const SellerSignUpForm: React.FC = () => {
                 <div className="step seller-form">
                     <h2 className="text-2xl mb-4 text-secondary-text reg">Регистрация продавца</h2>
                     <button className="close-button" onClick={handleClose}>
-                        <SvgSelector id="cross" className="h-4 w-4" />
+                        <SvgSelector id="cross" className="h-4 w-4"/>
                     </button>
                     <h2 className="text-2xl mb-4 text-secondary-text">Информация о компании</h2>
 
@@ -540,10 +575,12 @@ const SellerSignUpForm: React.FC = () => {
                     </div>
 
                     <div className="flex justify-between mt-4">
-                        <button onClick={handleBack} className="pare-button px-4 py-2 rounded bg-gray-300 text-primary-text">
+                        <button onClick={handleBack}
+                                className="pare-button px-4 py-2 rounded bg-gray-300 text-primary-text">
                             Назад
                         </button>
-                        <button onClick={handleNext} className="pare-button px-4 py-2 rounded bg-secondary-color text-secondary-text">
+                        <button onClick={handleNext}
+                                className="pare-button px-4 py-2 rounded bg-secondary-color text-secondary-text">
                             Далее
                         </button>
                     </div>
@@ -555,7 +592,7 @@ const SellerSignUpForm: React.FC = () => {
                 <div className="step" onKeyDown={handleOnKeyDown}>
                     <h2 className="text-2xl mb-4 text-secondary-text reg">Регистрация продавца</h2>
                     <button className="close-button" onClick={handleClose}>
-                        <SvgSelector id="cross" className="h-4 w-4" />
+                        <SvgSelector id="cross" className="h-4 w-4"/>
                     </button>
                     <h2 className="text-2xl mb-4 text-secondary-text">Платежные реквизиты</h2>
 
@@ -567,7 +604,8 @@ const SellerSignUpForm: React.FC = () => {
                         placeholder="Название банка *"
                         className="w-full p-2 mb-2 border rounded bg-primary-color text-primary-text"
                     />
-                    {errors.paymentDetail?.bankName && <p className="text-error-color text-sm mb-2">{errors.paymentDetail.bankName}</p>}
+                    {errors.paymentDetail?.bankName &&
+                        <p className="text-error-color text-sm mb-2">{errors.paymentDetail.bankName}</p>}
 
                     <input
                         type="text"
@@ -578,7 +616,8 @@ const SellerSignUpForm: React.FC = () => {
                         maxLength={20}
                         className="w-full p-2 mb-2 border rounded bg-primary-color text-primary-text"
                     />
-                    {errors.paymentDetail?.bankAccountNumber && <p className="text-error-color text-sm mb-2">{errors.paymentDetail.bankAccountNumber}</p>}
+                    {errors.paymentDetail?.bankAccountNumber &&
+                        <p className="text-error-color text-sm mb-2">{errors.paymentDetail.bankAccountNumber}</p>}
 
                     <input
                         type="text"
@@ -589,7 +628,8 @@ const SellerSignUpForm: React.FC = () => {
                         maxLength={9}
                         className="w-full p-2 mb-2 border rounded bg-primary-color text-primary-text"
                     />
-                    {errors.paymentDetail?.bic && <p className="text-error-color text-sm mb-2">{errors.paymentDetail.bic}</p>}
+                    {errors.paymentDetail?.bic &&
+                        <p className="text-error-color text-sm mb-2">{errors.paymentDetail.bic}</p>}
 
                     <input
                         type="text"
@@ -599,7 +639,8 @@ const SellerSignUpForm: React.FC = () => {
                         placeholder="Владелец счета *"
                         className="w-full p-2 mb-2 border rounded bg-primary-color text-primary-text"
                     />
-                    {errors.paymentDetail?.accountHolderName && <p className="text-error-color text-sm mb-2">{errors.paymentDetail.accountHolderName}</p>}
+                    {errors.paymentDetail?.accountHolderName &&
+                        <p className="text-error-color text-sm mb-2">{errors.paymentDetail.accountHolderName}</p>}
 
                     <input
                         type="text"
@@ -610,13 +651,16 @@ const SellerSignUpForm: React.FC = () => {
                         maxLength={10}
                         className="w-full p-2 mb-2 border rounded bg-primary-color text-primary-text"
                     />
-                    {errors.paymentDetail?.inn && <p className="text-error-color text-sm mb-2">{errors.paymentDetail.inn}</p>}
+                    {errors.paymentDetail?.inn &&
+                        <p className="text-error-color text-sm mb-2">{errors.paymentDetail.inn}</p>}
 
                     <div className="flex justify-between mt-4">
-                        <button onClick={handleBack} className="pare-button px-4 py-2 rounded bg-gray-300 text-primary-text">
+                        <button onClick={handleBack}
+                                className="pare-button px-4 py-2 rounded bg-gray-300 text-primary-text">
                             Назад
                         </button>
-                        <button onClick={handleNext} className="pare-button px-4 py-2 rounded bg-secondary-color text-secondary-text">
+                        <button onClick={handleNext}
+                                className="pare-button px-4 py-2 rounded bg-secondary-color text-secondary-text">
                             Зарегистрироваться
                         </button>
                     </div>

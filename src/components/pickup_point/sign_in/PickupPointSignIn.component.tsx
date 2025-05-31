@@ -2,12 +2,14 @@ import React, {useEffect, useRef, useState} from "react";
 import "./PickupPointSignIn.style.scss"
 import SvgSelector from "../../SvgSelector.component.tsx";
 import {useNavigate} from "react-router-dom";
+import {sendCode, signInWithCode, signInWithPassword} from "../../../api/AuthApi.ts";
 
 
 interface SignUpErrors {
     email?: string;
-    verifyCode?: string;
+    code?: string;
     password?: string;
+    response?: string;
 }
 
 const validateEmail = (email: string) => {
@@ -42,12 +44,12 @@ const PickupPointSignIn: React.FC = () => {
         }
     }, [step, authMode]);
 
-
-    const [formData, setFormData] = useState({
+    const emptyFormData = {
         email: "",
-        verifyCode: "",
+        code: "",
         password: "",
-    });
+    };
+    const [formData, setFormData] = useState(emptyFormData);
 
     const [errors, setErrors] = useState<SignUpErrors>({});
     const [codeInputs, setCodeInputs] = useState<string[]>(Array(6).fill(''));
@@ -61,7 +63,7 @@ const PickupPointSignIn: React.FC = () => {
     const handleModeSwitch = (mode: "code" | "password") => {
         setAuthMode(mode);
         setStep(1);
-        setFormData({email: "", verifyCode: "", password: ""});
+        setFormData({email: "", code: "", password: ""});
         setErrors({});
     };
 
@@ -70,7 +72,7 @@ const PickupPointSignIn: React.FC = () => {
             const newCodeInputs = [...codeInputs];
             newCodeInputs[index] = value;
             setCodeInputs(newCodeInputs);
-            setFormData({...formData, verifyCode: newCodeInputs.join('')});
+            setFormData({...formData, code: newCodeInputs.join('')});
 
             if (value && index < 5) {
                 inputRefs.current[index + 1]?.focus();
@@ -92,13 +94,13 @@ const PickupPointSignIn: React.FC = () => {
                 newCodeInputs[i] = char;
             });
             setCodeInputs(newCodeInputs);
-            setFormData({...formData, verifyCode: newCodeInputs.join('')});
+            setFormData({...formData, code: newCodeInputs.join('')});
             inputRefs.current[pastedData.length - 1]?.focus();
         }
         e.preventDefault();
     };
 
-    const handleNext = () => {
+    const handleNext = async () => {
         const stepErrors: SignUpErrors = {};
 
         if (authMode === "code") {
@@ -111,18 +113,39 @@ const PickupPointSignIn: React.FC = () => {
                 }
 
                 if (!stepErrors.email) {
+                    try{
+                        await sendCode(formData.email);
+                    }catch(e:any){
+                        stepErrors.response = 'Ошибка при отправке кода';
+                        return;
+                    }
+
                     setStep(2);
                 }
 
             } else if (step === 2) {
-                const codeError = validateCode(formData.verifyCode);
+                const codeError = validateCode(formData.code);
                 if (codeError) {
-                    stepErrors.verifyCode = codeError;
+                    stepErrors.code = codeError;
                 }
 
-                if (!stepErrors.verifyCode) {
-                    alert("Успешный вход по коду");
-                    navigate("/seller/products");
+                if (!stepErrors.code) {
+                    try{
+                        await signInWithCode('p', formData);
+                        navigate("/pp/orders");
+                    }catch(e:any){
+                        if (e.response?.status === 401 || e.response?.status === 404) {
+                            stepErrors.response = e.response.data.message;
+                            setFormData(emptyFormData);
+                            setCodeInputs(Array(6).fill(''));
+                            setStep(1);
+                        }else {
+                            stepErrors.email = 'Ошибка при входе в аккаунт, попробуйте попытку позже!';
+                            setFormData(emptyFormData);
+                            setCodeInputs(Array(6).fill(''));
+                            setStep(1);
+                        }
+                    }
                 }
             }
 
@@ -142,8 +165,22 @@ const PickupPointSignIn: React.FC = () => {
             }
 
             if (!stepErrors.email && !stepErrors.password) {
-                alert("Успешный вход по паролю");
-                navigate("/seller/products");
+                try{
+                    await signInWithPassword('p', formData);
+                    navigate("/pp/orders");
+                }catch(e:any){
+                    if (e.response?.status === 401 || e.response?.status === 404) {
+                        stepErrors.response = e.response.data.message;
+                        setFormData(emptyFormData);
+                        setCodeInputs(Array(6).fill(''));
+                        setStep(1);
+                    }else {
+                        stepErrors.email = 'Ошибка при входе в аккаунт, попробуйте попытку позже!';
+                        setFormData(emptyFormData);
+                        setCodeInputs(Array(6).fill(''));
+                        setStep(1);
+                    }
+                }
             }
         }
 
@@ -157,7 +194,7 @@ const PickupPointSignIn: React.FC = () => {
     const handleClose = () => {
         setFormData({
             email: '',
-            verifyCode: '',
+            code: '',
             password: ''
         });
         setCodeInputs(Array(6).fill(''));
@@ -235,8 +272,8 @@ const PickupPointSignIn: React.FC = () => {
                             />
                         ))}
                     </div>
-                    <p className={`text-sm h-5 ${errors.verifyCode ? 'text-error-color' : 'text-invisible-color'}`}>
-                        {errors.verifyCode || 'В'}
+                    <p className={`text-sm h-5 ${errors.code ? 'text-error-color' : 'text-invisible-color'}`}>
+                        {errors.code || 'В'}
                     </p>
                     <div className="flex justify-between mt-4">
                         <button

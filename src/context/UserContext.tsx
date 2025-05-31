@@ -276,8 +276,8 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 isActive: true,
                 isLocked: false,
                 userProfile: {
-                    surname: 'Иванов',
-                    name: 'Иван',
+                    surname: 'Ивановasd',
+                    name: 'Иванasd',
                     patronymic: 'Иванович',
                     phoneNumber: '+79998887766',
                 },

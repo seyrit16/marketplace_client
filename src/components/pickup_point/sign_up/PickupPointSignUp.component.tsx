@@ -3,6 +3,7 @@ import SvgSelector from '../../SvgSelector.component.tsx';
 import './PickupPointSignUp.style.scss';
 import type {PickupPointSignUpData,PickupPointCreateRequest} from '../../../models/PickupPoint.model.ts'
 import { useNavigate } from "react-router-dom";
+import {sendCode, signUpPickupPoint, signUpSeller} from "../../../api/AuthApi.ts";
 
 interface PickupPointSignUpErrors {
     email?: string;
@@ -12,7 +13,7 @@ interface PickupPointSignUpErrors {
         region?: string;
         city?: string;
         street?: string;
-        house?: string;
+        houseNumber?: string;
         postalCode?: string;
     };
     workingHours?: string;
@@ -38,7 +39,7 @@ const PickupPointSignUp: React.FC = () => {
         }
     }, [step]);
 
-    const [formData, setFormData] = useState<PickupPointSignUpData>({
+    const emptyFormData: PickupPointSignUpData = {
         email: '',
         password: '',
         code: '',
@@ -48,14 +49,15 @@ const PickupPointSignUp: React.FC = () => {
                 region: '',
                 city: '',
                 street: '',
-                house: '',
+                houseNumber: '',
                 postalCode: '',
             },
             workingHours: '',
             phoneNumber: '',
             addInfo: '',
         },
-    });
+    }
+    const [formData, setFormData] = useState<PickupPointSignUpData>(emptyFormData);
 
     const [errors, setErrors] = useState<PickupPointSignUpErrors>({});
     const [codeInputs, setCodeInputs] = useState<string[]>(Array(6).fill(''));
@@ -193,7 +195,7 @@ const PickupPointSignUp: React.FC = () => {
                 stepErrors.address.region = validateRequired(addr.region, 'Регион');
                 stepErrors.address.city = validateRequired(addr.city, 'Город');
                 stepErrors.address.street = validateRequired(addr.street, 'Улица');
-                stepErrors.address.house = validateRequired(addr.house, 'Дом');
+                stepErrors.address.houseNumber = validateRequired(addr.houseNumber, 'Дом');
                 if (addr.postalCode) {
                     stepErrors.address.postalCode = validatePostalCode(addr.postalCode);
                 } else {
@@ -224,12 +226,20 @@ const PickupPointSignUp: React.FC = () => {
         });
     };
 
-    const handleNext = () => {
+    const handleNext = async () => {
         const stepErrors = validateStep(step);
         setErrors(stepErrors);
 
         if (!hasStepErrors(stepErrors)) {
             if (step < 5) {
+                if (step == 1) {
+                    try {
+                        await sendCode(formData.email);
+                    } catch (e: any) {
+                        stepErrors.email = 'Ошибка при отправке кода';
+                        return;
+                    }
+                }
                 setStep(step + 1);
                 // Генерируем ID при переходе к последнему шагу
                 if (step === 4) {
@@ -242,9 +252,27 @@ const PickupPointSignUp: React.FC = () => {
                     }));
                 }
             } else {
-                console.log('Pickup point registration data:', formData);
-                alert('Регистрация пункта выдачи успешна!');
-                navigate("/pp/orders");
+                try {
+                    await signUpPickupPoint(formData);
+                    navigate("/pp/sign_in");
+                } catch (e: any) {
+                    if (e.response?.status === 401) {
+                        stepErrors.email = e.response.data.message;
+                        setFormData(emptyFormData);
+                        setCodeInputs(Array(6).fill(''));
+                        setStep(1);
+                    } else if (e.response?.status === 409) {
+                        stepErrors.email = e.response.data.message;
+                        setFormData(emptyFormData);
+                        setCodeInputs(Array(6).fill(''));
+                        setStep(1);
+                    } else {
+                        stepErrors.email = 'Ошибка при создании аккаунта, попробуйте попытку позже!';
+                        setFormData(emptyFormData);
+                        setCodeInputs(Array(6).fill(''));
+                        setStep(1);
+                    }
+                }
             }
         }
     };
@@ -264,7 +292,7 @@ const PickupPointSignUp: React.FC = () => {
                     region: '',
                     city: '',
                     street: '',
-                    house: '',
+                    houseNumber: '',
                     postalCode: '',
                 },
                 workingHours: '',
@@ -439,13 +467,13 @@ const PickupPointSignUp: React.FC = () => {
                     <div className="field-group">
                         <input
                             type="text"
-                            name="address.house"
-                            value={formData.pickupPointCreateRequest.address.house}
+                            name="address.houseNumber"
+                            value={formData.pickupPointCreateRequest.address.houseNumber}
                             onChange={handleChange}
                             placeholder="Дом *"
                             className="w-full p-2 mb-2 border rounded bg-primary-color text-primary-text"
                         />
-                        {errors.address?.house && <p className="text-error-color">{errors.address.house}</p>}
+                        {errors.address?.houseNumber && <p className="text-error-color">{errors.address.houseNumber}</p>}
                     </div>
 
                     <div className="field-group">
