@@ -5,11 +5,25 @@ export interface UserProfile {
     phoneNumber: string;
 }
 
+export interface UpdateUserProfileData {
+    surname?: string;
+    name?: string;
+    patronymic?: string;
+    phoneNumber?: string;
+}
+
 export interface User {
     email: string;
-    role: 'USER' | 'ADMIN';
+    role: string;
     isActive: boolean;
     isLocked: boolean;
+    userProfile: UserProfile;
+}
+
+export interface SignUpData {
+    email: string;
+    verifyCode: string;
+    password: string;
     userProfile: UserProfile;
 }
 
@@ -52,6 +66,7 @@ export interface UserProfileErrors {
     name?: string;
     patronymic?: string;
     phoneNumber?: string;
+    response?: string; // General error message
 }
 
 export interface EmailUpdateErrors {
